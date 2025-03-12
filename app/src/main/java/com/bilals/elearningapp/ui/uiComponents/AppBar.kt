@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -26,19 +27,30 @@ fun AppBar(title: String, onBackClick: () -> Unit) {
             .background(PrimaryBlack),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IconButton(onClick = onBackClick) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Back",
-                tint = androidx.compose.ui.graphics.Color.White
-            )
+        if (title != "Home") {
+
+            IconButton(onClick = onBackClick) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back",
+                    tint = androidx.compose.ui.graphics.Color.White
+                )
+            }
+        } else {
+            IconButton(onClick = onBackClick) {
+                Icon(
+                    imageVector = Icons.Filled.Home,
+                    contentDescription = "Back",
+                    tint = androidx.compose.ui.graphics.Color.White
+                )
+            }
         }
         val adjustedTextSize = if (title.length > 22) 16.sp else 25.sp
-
         Text(
             text = title.uppercase(),
             style = AppTypography.titleMedium.copy(fontSize = adjustedTextSize),
             color = androidx.compose.ui.graphics.Color.White
         )
+//        }
     }
 }

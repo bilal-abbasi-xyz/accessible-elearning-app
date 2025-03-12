@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "676155074190",
+    "project_id": "accessible-e-learning-app",
+    "storage_bucket": "accessible-e-learning-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:676155074190:android:578822bd28be4db95c8bdf",
+        "android_client_info": {
+          "package_name": "com.bilals.elearningapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBMNdTEzmv4FQWfkUoK2zrRJF5EUxDQ_sU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
