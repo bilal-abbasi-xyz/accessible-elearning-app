@@ -1,0 +1,38 @@
+QUESTIONS:
+
+sealed class
+class vs file?
+whats 'remember'
+mutableStateOf
+how to make sure that id is unique
+note that the program is passing ids between screens instead of instances (hence assuming ids of everything like subsections are unique)
+is it better to store things by id or store their instance? e.g., in Course, should there be a list of Users or userIds
+
+"Accessibility Scanner: Use Android’s Accessibility Scanner tool, which scans your app for common accessibility issues and provides recommendations for improvements.
+Automated Accessibility Testing: Tools like Espresso Accessibility Test or UI Automator can be used to automate testing of accessibility behaviors in your app."
+
+why serializable
+
+TO-DO:
+
+dont use both material and material3
+remove comments
+check all warnings in IDE
+check console errors
+dont use livedata use jetpack compose's state
+edit ui texts like "Welcome to Category List Screen!"
+use consistent heading styles for ui
+some places nullable values like String? are used while other places non-nullable ones are used
+make dummy/DB data exhaustive
+no error messages added yet like if no answer is chosen in quiz
+Consider using launched effect in screen files to handle navigation (as done in SignUpScreen)
+Course list should show category name (same for sections and subsections)
+Consider numbering all buttons
+Upload on git
+On first launce, TTS is not initialized suddenly so speakText() doesn't work.
+When focused on a password field, reader says the redundant prefix "Enter password".
+Add option to pause listening (might be needed for noisy areas)
+gesture navigation
+apply validations
+inconsistency in signup and login screens (e.g. how they navigate to home screen and show Toast)
+optimize data navigation. Right now using public singleton

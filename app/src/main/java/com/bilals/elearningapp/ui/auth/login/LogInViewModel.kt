@@ -6,7 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bilals.elearningapp.data.repository.AuthRepository
-import com.bilals.elearningapp.ui.auth.SessionManager
+import com.bilals.elearningapp.SessionManager
 import kotlinx.coroutines.launch
 
 

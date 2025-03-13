@@ -1,6 +1,7 @@
 package com.bilals.elearningapp.data.repository
 
 import android.content.Context
+import android.util.Log
 import com.bilals.elearningapp.DatabaseSyncManager
 import com.bilals.elearningapp.data.local.AnswerDao
 import com.bilals.elearningapp.data.model.quiz.Answer
@@ -33,5 +34,17 @@ class AnswerRepository(
         dbSyncManager.syncAnswers(questionId)
     }
 
+
+    suspend fun updateAnswer(answer: Answer) {
+        try {
+            firebaseService.updateAnswer(answer)
+            // Update the local Room database.
+            answerDao.updateAnswer(answer)
+
+            Log.d("AnswerRepository", "Answer updated successfully: ${answer.id}")
+        } catch (e: Exception) {
+            Log.e("AnswerRepository", "Error updating answer", e)
+        }
+    }
 
 }

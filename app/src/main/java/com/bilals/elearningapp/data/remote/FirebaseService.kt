@@ -5,6 +5,7 @@ import com.bilals.elearningapp.data.model.ChatMessage
 import com.bilals.elearningapp.data.model.Course
 import com.bilals.elearningapp.data.model.CourseCategory
 import com.bilals.elearningapp.data.model.Lecture
+import com.bilals.elearningapp.data.model.PublicChatMessage
 import com.bilals.elearningapp.data.model.Resource
 import com.bilals.elearningapp.data.model.Section
 import com.bilals.elearningapp.data.model.quiz.Answer
@@ -358,6 +359,41 @@ class FirebaseService {
         }
     }
 
+    suspend fun updateQuizScore(quizId: String, userId: String, score: Int, maxPoints: Int) {
+
+        // Update Firestore
+        firestore.collection("users").document(userId)
+            .collection("quizScores").document(quizId)
+            .set(mapOf("score" to score, "maxPoints" to maxPoints))
+            .await()
+    }
+
+    suspend fun updateAnswer(answer: Answer) {
+        try {
+            // Find the correct question document
+            val snapshot = firestore.collectionGroup("questions")
+                .whereEqualTo("id", answer.questionId)
+                .get()
+                .await()
+
+            val questionDoc = snapshot.documents.firstOrNull()
+
+            if (questionDoc != null) {
+                questionDoc.reference.collection("answers")
+                    .document(answer.id)
+                    .set(answer)
+                    .await()
+
+
+                Log.d("AnswerRepository", "Answer updated successfully: ${answer.id}")
+            } else {
+                throw Exception("Question not found for questionId: ${answer.questionId}")
+            }
+        } catch (e: Exception) {
+            Log.e("AnswerRepository", "Error updating answer", e)
+        }
+    }
+
 
     suspend fun getMessages(courseId: String): List<ChatMessage> {
         val snapshot = firestore.collectionGroup("chat_messages")
@@ -370,6 +406,41 @@ class FirebaseService {
     }
 
 
+    fun listenForPublicMessages(
+        onMessageChange: (PublicChatMessage, DocumentChange.Type) -> Unit
+    ) {
+        firestore.collection("public_chat_messages")
+            .orderBy("timestamp", Query.Direction.ASCENDING)
+            .addSnapshotListener { snapshot, _ ->
+                if (snapshot != null) {
+                    snapshot.documentChanges.forEach { change ->
+                        val message = change.document.toObject(PublicChatMessage::class.java)
+                        onMessageChange(
+                            message,
+                            change.type
+                        )
+                    }
+                }
+            }
+    }
+
+    fun sendPublicMessage(message: PublicChatMessage, onComplete: (Boolean) -> Unit) {
+        Log.d("SendPublicMessage", "Attempting to send public message with ID: ${message.id}")
+
+        firestore.collection("public_chat_messages")
+            .document(message.id)
+            .set(message)
+            .addOnSuccessListener {
+                Log.d("SendPublicMessage", "Message uploaded successfully to Firebase!")
+                onComplete(true)
+            }
+            .addOnFailureListener { exception ->
+                Log.e("SendPublicMessage", "Error uploading message: ${exception.message}")
+                onComplete(false)
+            }
+    }
+
+
     fun sendMessage(courseId: String, message: ChatMessage, onComplete: (Boolean) -> Unit) {
         // Log the start of the message sending process
         Log.d(
@@ -377,8 +448,8 @@ class FirebaseService {
             "Attempting to send message to courseId: $courseId with message id: ${message.id}"
         )
 
-        firestore.collectionGroup("courses") // ✅ Find the correct course
-            .whereEqualTo("id", courseId) // ✅ Ensure the right course
+        firestore.collectionGroup("courses")
+            .whereEqualTo("id", courseId) //
             .get()
             .addOnSuccessListener { snapshot ->
                 val courseDoc = snapshot.documents.firstOrNull()
@@ -387,7 +458,7 @@ class FirebaseService {
                 if (courseDoc != null) {
                     Log.d("SendMessage", "Course found, uploading message...")
 
-                    courseDoc.reference.collection("chat_messages") // ✅ Navigate to chat_messages
+                    courseDoc.reference.collection("chat_messages")
                         .document(message.id)
                         .set(message)
                         .addOnSuccessListener {
@@ -434,6 +505,16 @@ class FirebaseService {
                         }
                 }
             }
+    }
+
+
+    suspend fun getPublicMessages(): List<PublicChatMessage> {
+        val snapshot = firestore.collection("public_chat_messages")
+            .orderBy("timestamp", Query.Direction.ASCENDING)
+            .get()
+            .await()
+
+        return snapshot.documents.mapNotNull { it.toObject(PublicChatMessage::class.java) }
     }
 
 

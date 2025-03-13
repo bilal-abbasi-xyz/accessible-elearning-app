@@ -5,6 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import com.bilals.elearningapp.data.model.quiz.Answer
 import kotlinx.coroutines.flow.Flow
 
@@ -33,5 +34,8 @@ interface AnswerDao {
 
     @Delete
     suspend fun deleteAnswers(answers: List<Answer>)
+
+    @Update
+    suspend fun updateAnswer(answer: Answer)
 }
 

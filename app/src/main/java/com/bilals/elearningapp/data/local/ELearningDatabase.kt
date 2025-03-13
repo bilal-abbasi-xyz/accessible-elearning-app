@@ -6,19 +6,22 @@ import com.bilals.elearningapp.data.model.ChatMessage
 import com.bilals.elearningapp.data.model.Course
 import com.bilals.elearningapp.data.model.CourseCategory
 import com.bilals.elearningapp.data.model.Lecture
+import com.bilals.elearningapp.data.model.PublicChatMessage
 import com.bilals.elearningapp.data.model.Resource
 import com.bilals.elearningapp.data.model.Section
+import com.bilals.elearningapp.data.model.User
 import com.bilals.elearningapp.data.model.quiz.Answer
 import com.bilals.elearningapp.data.model.quiz.Question
 import com.bilals.elearningapp.data.model.quiz.Quiz
-import com.bilals.elearningapp.data.model.user.User
+import com.bilals.elearningapp.data.model.quiz.QuizScore
 
 @Database(
     entities = [
         CourseCategory::class, Course::class, Section::class, Lecture::class, Resource::class,
-        Quiz::class, Question::class, Answer::class, ChatMessage::class, User::class
+        Quiz::class, Question::class, Answer::class, ChatMessage::class, User::class, QuizScore::class,
+        PublicChatMessage::class
     ],
-    version = 1
+    version = 14
 )
 abstract class ElearningDatabase : RoomDatabase() {
     abstract fun courseDao(): CourseDao
@@ -31,6 +34,8 @@ abstract class ElearningDatabase : RoomDatabase() {
     abstract fun answerDao(): AnswerDao
     abstract fun chatMessageDao(): ChatMessageDao
     abstract fun userDao(): UserDao
+    abstract fun quizScoreDao(): QuizScoreDao
+    abstract fun publicChatMessageDao(): PublicChatMessageDao
 
     companion object {
         @Volatile

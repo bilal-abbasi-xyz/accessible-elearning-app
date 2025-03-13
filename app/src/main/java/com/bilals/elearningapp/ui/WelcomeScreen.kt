@@ -86,7 +86,7 @@ fun WelcomeScreen(navController: NavController) {
             )
 
             Text(
-                text = "We know the UI isn't great, but we're working on it!",
+                text = "eLearning App for Visually Impaired!",
                 style = MaterialTheme.typography.bodyLarge.copy(
                     fontSize = 18.sp,
                     color = Color.Gray

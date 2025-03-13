@@ -18,6 +18,10 @@ val AppTypography = Typography(
         fontFamily = lexendFont,
         fontSize = 20.sp
     ),
+    bodySmall = TextStyle(
+        fontFamily = lexendFont,
+        fontSize = 12.sp
+    ),
     bodyMedium = TextStyle(
         fontFamily = lexendFont,
         fontSize = 16.sp

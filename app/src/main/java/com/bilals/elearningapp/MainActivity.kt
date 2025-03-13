@@ -9,7 +9,6 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,10 +16,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.pointerInteropFilter
+import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -28,7 +32,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.bilals.elearningapp.data.model.user.RoleType
+import com.bilals.elearningapp.data.model.RoleType
 import com.bilals.elearningapp.data.repository.AuthRepository
 import com.bilals.elearningapp.di.AppContainer
 import com.bilals.elearningapp.navigation.ScreenRoutes
@@ -36,27 +40,26 @@ import com.bilals.elearningapp.stt.STTManager
 import com.bilals.elearningapp.stt.SpeechInputHandler
 import com.bilals.elearningapp.stt.VoiceCommandProcessor
 import com.bilals.elearningapp.tts.TTSManager
-import com.bilals.elearningapp.ui.auth.SessionManager
 import com.bilals.elearningapp.ui.auth.login.LogInScreen
 import com.bilals.elearningapp.ui.auth.signup.SignUpScreen
 import com.bilals.elearningapp.ui.auth.signup.SignUpViewModel
-import com.bilals.elearningapp.ui.categoryList.CategoryListScreen
-import com.bilals.elearningapp.ui.courseDetail.CourseDetailScreen
-import com.bilals.elearningapp.ui.courseForum.CourseForumScreen
-import com.bilals.elearningapp.ui.courseList.CourseListScreen
-import com.bilals.elearningapp.ui.createSectionScreen.CreateSectionContentScreen
-import com.bilals.elearningapp.ui.home.HomeScreen
+import com.bilals.elearningapp.ui.browsing.publicForum.PublicForumScreen
+import com.bilals.elearningapp.ui.contentCreation.browsing.categoryList.CategoryListScreen
+import com.bilals.elearningapp.ui.contentCreation.browsing.courseDetail.CourseDetailScreen
+import com.bilals.elearningapp.ui.contentCreation.browsing.courseForum.CourseForumScreen
+import com.bilals.elearningapp.ui.contentCreation.browsing.courseList.CourseListScreen
+import com.bilals.elearningapp.ui.contentCreation.browsing.home.HomeScreen
+import com.bilals.elearningapp.ui.contentCreation.browsing.lecture.ViewLectureScreen
+import com.bilals.elearningapp.ui.contentCreation.browsing.quiz.AttemptQuizScreen
+import com.bilals.elearningapp.ui.contentCreation.browsing.resource.ViewResourceScreen
+import com.bilals.elearningapp.ui.contentCreation.browsing.sectionDetail.SectionDetailScreen
+import com.bilals.elearningapp.ui.contentCreation.createQuiz.CreateQuizScreen
+import com.bilals.elearningapp.ui.contentCreation.sectionContentCreation.CreateSectionContentScreen
+import com.bilals.elearningapp.ui.contentCreation.unpublishedCourses.UnpublishedCourseListScreen
 import com.bilals.elearningapp.ui.instructor.InstructorHomeScreen
-import com.bilals.elearningapp.ui.lecture.ViewLectureScreen
-import com.bilals.elearningapp.ui.profileSettings.ProfileSettingsScreen
-import com.bilals.elearningapp.ui.quiz.AttemptQuizScreen
-import com.bilals.elearningapp.ui.resource.ViewResourceScreen
-import com.bilals.elearningapp.ui.sectionDetail.SectionDetailScreen
-import com.bilals.elearningapp.ui.settings.SettingsScreen
-import com.bilals.elearningapp.ui.settings.VoiceSettingsScreen
+import com.bilals.elearningapp.ui.settings.profile.ProfileSettingsScreen
+import com.bilals.elearningapp.ui.settings.home.SettingsScreen
 import com.bilals.elearningapp.ui.theme.AppTheme
-import com.bilals.elearningapp.ui.uiSettings.UISettingsScreen
-import com.bilals.elearningapp.ui.unpublishedCourses.UnpublishedCourseListScreen
 import com.bilals.elearningapp.ui.welcomeScreen.WelcomeScreen
 import com.google.firebase.auth.FirebaseAuth
 import kotlin.math.absoluteValue
@@ -142,20 +145,30 @@ fun AppContent(context: Context) {
     AppNavHost(navController, appContainer)
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun HandleSwipeGestures(speechInputHandler: SpeechInputHandler) {
-
-    Box(modifier = Modifier
-        .fillMaxSize()
-        .pointerInput(Unit) {
-            detectHorizontalDragGestures { change, dragAmount ->
-
-                if (dragAmount.absoluteValue > 50 && !speechInputHandler.isListening) {
-                    speechInputHandler.startListening()
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            // This lets pointer events pass through to underlying composables
+            .pointerInteropFilter { false }
+            // Now detect swipes without consuming the events
+            .pointerInput(Unit) {
+                awaitPointerEventScope {
+                    while (true) {
+                        val event = awaitPointerEvent(PointerEventPass.Final)
+                        val dragAmount = event.changes.firstOrNull()?.positionChange()?.x ?: 0f
+                        if (dragAmount.absoluteValue > 50 && !speechInputHandler.isListening) {
+                            speechInputHandler.startListening()
+                        }
+                        // Do NOT consume any changes here!
+                    }
                 }
             }
-        })
+    )
 }
+
 
 @Composable
 fun RecognizedTextDisplay(recognizedText: MutableState<String>, context: Context) {
@@ -267,12 +280,10 @@ fun AppNavHost(navController: NavHostController, appContainer: AppContainer) {
         composable(ScreenRoutes.ProfileSettings.route) {
             ProfileSettingsScreen(navController = navController)
         }
-        composable(ScreenRoutes.UISettings.route) {
-            UISettingsScreen(navController = navController)
+        composable(ScreenRoutes.PublicForum.route) {
+            PublicForumScreen(navController = navController, appContainer)
         }
-        composable(ScreenRoutes.VoiceSettings.route) {
-            VoiceSettingsScreen(navController = navController)
-        }
+
         composable(ScreenRoutes.Login.route) {
             LogInScreen(navController = navController)
         }
@@ -305,6 +316,14 @@ fun AppNavHost(navController: NavHostController, appContainer: AppContainer) {
                 sectionId = sectionId,
                 sectionName = sectionName,
                 appContainer
+            )
+        }
+
+        composable(ScreenRoutes.CreateQuiz.route) { backStackEntry ->
+            val quizId = backStackEntry.arguments?.getString("quizId") ?: ""
+            val quizName = backStackEntry.arguments?.getString("quizName") ?: ""
+            CreateQuizScreen(
+                navController = navController, quizId = quizId, quizName = quizName, appContainer
             )
         }
     }

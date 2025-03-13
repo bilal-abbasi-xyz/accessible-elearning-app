@@ -1,7 +1,7 @@
 package com.bilals.elearningapp.data.repository
 
 import com.bilals.elearningapp.data.local.UserDao
-import com.bilals.elearningapp.data.model.user.User
+import com.bilals.elearningapp.data.model.User
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

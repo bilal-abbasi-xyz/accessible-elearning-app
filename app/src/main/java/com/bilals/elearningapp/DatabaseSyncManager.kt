@@ -18,6 +18,7 @@ class DatabaseSyncManager(context: Context) {
     private val questionDao = database.questionDao()
     private val answerDao = database.answerDao()
     private val chatMessageDao = database.chatMessageDao()
+    private val publicChatMessageDao = database.publicChatMessageDao()
 
     // Firebase service
     private val firebaseService = FirebaseServiceSingleton.instance
@@ -586,5 +587,31 @@ class DatabaseSyncManager(context: Context) {
         }
     }
 
+    suspend fun syncPublicChatMessages() {
+        val firebaseMessages = firebaseService.getPublicMessages() // ✅ Fetch from Firebase
+        val localMessages = publicChatMessageDao.getMessages().first() // ✅ Fetch from Room
+
+        // Find messages that need to be inserted or updated
+        val messagesToInsertOrUpdate = firebaseMessages.filter { firebaseMessage ->
+            val localMessage = localMessages.find { it.id == firebaseMessage.id }
+            localMessage == null || localMessage != firebaseMessage
+        }
+
+        // Insert or update messages in the local database
+        if (messagesToInsertOrUpdate.isNotEmpty()) {
+            publicChatMessageDao.insertMessages(messagesToInsertOrUpdate) // ✅ Insert new/updated messages
+        }
+
+        // Find messages that are locally stored but not present in Firebase (delete them)
+        val messagesToDelete = localMessages.filter { localMessage ->
+            firebaseMessages.none { it.id == localMessage.id }
+        }
+
+        // Delete messages from the local database that are not in Firebase
+        if (messagesToDelete.isNotEmpty()) {
+            val messageIdsToDelete = messagesToDelete.map { it.id }
+            publicChatMessageDao.deleteMessages(messageIdsToDelete) // ✅ Remove deleted messages from Room
+        }
+    }
 
 }

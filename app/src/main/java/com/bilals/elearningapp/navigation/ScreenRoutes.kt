@@ -38,6 +38,7 @@ sealed class ScreenRoutes(val route: String) {
     object CourseForum : ScreenRoutes("courseForum/{courseId}/{courseName}") {
         fun createRoute(courseId: String, courseName: String) = "courseForum/$courseId/$courseName"
     }
+    object PublicForum : ScreenRoutes("publicForum")
 
     object Settings : ScreenRoutes("settings")
     object Training : ScreenRoutes("training")
@@ -58,6 +59,10 @@ sealed class ScreenRoutes(val route: String) {
     object CreateSectionContent : ScreenRoutes("createSectionContent/{sectionId}/{sectionName}") {
         fun createRoute(sectionId: String, sectionName: String) =
             "createSectionContent/$sectionId/$sectionName"
+    }
+
+    object CreateQuiz : ScreenRoutes("createQuiz/{quizId}/{quizName}") {
+        fun createRoute(quizId: String, quizName: String) = "createQuiz/$quizId/$quizName"
     }
 
 }

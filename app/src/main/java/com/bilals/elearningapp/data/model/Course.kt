@@ -1,7 +1,5 @@
 package com.bilals.elearningapp.data.model
 
-import com.bilals.elearningapp.data.model.user.User
-import java.io.Serializable
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey

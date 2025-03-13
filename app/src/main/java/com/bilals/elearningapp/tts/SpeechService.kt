@@ -8,6 +8,9 @@ import android.view.accessibility.AccessibilityManager
 object SpeechService {
 
     fun announce(context: Context, message: String) {
+        // Cancel any ongoing TTS speech first
+        TTSManager.cancel()
+
         val accessibilityManager =
             context.getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
         Log.e("test", "in announce")
@@ -23,4 +26,5 @@ object SpeechService {
             TTSManager.speakText(message)
         }
     }
+
 }

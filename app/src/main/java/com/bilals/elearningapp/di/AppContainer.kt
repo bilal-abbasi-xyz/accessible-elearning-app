@@ -3,8 +3,10 @@ package com.bilals.elearningapp.di
 import CourseRepository
 import android.content.Context
 import com.bilals.elearningapp.data.local.ElearningDatabase
+import com.bilals.elearningapp.data.repository.AnswerRepository
 import com.bilals.elearningapp.data.repository.CourseCategoryRepository
 import com.bilals.elearningapp.data.repository.LectureRepository
+import com.bilals.elearningapp.data.repository.QuestionRepository
 import com.bilals.elearningapp.data.repository.QuizRepository
 import com.bilals.elearningapp.data.repository.ResourceRepository
 import com.bilals.elearningapp.data.repository.SectionRepository
@@ -20,4 +22,6 @@ class AppContainer(context: Context) {
     val lectureRepository: LectureRepository = LectureRepository(database.lectureDao(), context)
     val resourceRepository: ResourceRepository = ResourceRepository(database.resourceDao(), context)
     val userRepository: UserRepository = UserRepository(database.userDao())
+    val answerRepository: AnswerRepository = AnswerRepository(database.answerDao(), context)
+    val questionRepository: QuestionRepository = QuestionRepository(database.questionDao(), context)
 }

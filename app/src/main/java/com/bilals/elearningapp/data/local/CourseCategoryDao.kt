@@ -26,6 +26,6 @@ interface CourseCategoryDao {
     suspend fun getCategoryById(categoryId: String): CourseCategory?
 
     @Delete
-    suspend fun deleteCategories(categories: List<CourseCategory>) // ✅ Delete multiple categories
+    suspend fun deleteCategories(categories: List<CourseCategory>)
 }
 

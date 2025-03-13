@@ -6,6 +6,8 @@ import android.widget.Toast
 import androidx.compose.runtime.MutableState
 import androidx.navigation.NavController
 import com.bilals.elearningapp.navigation.ScreenRoutes
+import com.bilals.elearningapp.tts.SpeechService
+import com.bilals.elearningapp.tts.TTSManager
 import org.apache.commons.text.similarity.CosineSimilarity
 
 class SpeechInputHandler(
@@ -25,13 +27,15 @@ class SpeechInputHandler(
         "voice settings" to ScreenRoutes.VoiceSettings.route,
         "login" to ScreenRoutes.Login.route,
         "sign up" to ScreenRoutes.SignUp.route,
-        "categories" to ScreenRoutes.CategoryList.route
+        "categories" to ScreenRoutes.CategoryList.route,
+        "home screen" to ScreenRoutes.Home.route,
+        "public forum" to ScreenRoutes.PublicForum.route
     )
 
 
     private val commandVariations = mapOf(
         "settings" to listOf("settings", "open settings", "modify settings", "show settings"),
-        "profile settings" to listOf("profile settings", "edit profile", "update profile"),
+        "profile settings" to listOf("profile settings", "edit profile", "update profile", "profile"),
         "voice settings" to listOf(
             "voice settings",
             "adjust voice",
@@ -40,7 +44,9 @@ class SpeechInputHandler(
         ),
         "login" to listOf("login", "sign in", "log in", "log into my account"),
         "sign up" to listOf("sign up", "register", "create an account", "join now"),
-        "categories" to listOf("categories", "browse courses", "show courses")
+        "categories" to listOf("categories", "browse courses", "show courses"),
+        "public forum" to listOf("public forum", "public", "forum"),
+        "home screen" to listOf("home screen", "home", "ham")
     )
 
     private val synonyms = mapOf(
@@ -55,21 +61,30 @@ class SpeechInputHandler(
         "profile" to listOf("profile", "account"),
         "voice" to listOf("voice", "audio", "sound"),
         "categories" to listOf("category", "topics", "topic"),
-        "commands" to listOf("commands", "command", "hotkeys")
+        "commands" to listOf("commands", "command", "hotkeys"),
+        "public forum" to listOf("public forum", "chat", "forum", "public"),
+
+        "home screen" to listOf("home screen", "home", "ham"),
     )
 
 
     fun startListening() {
         if (isListening) return
 
-        isListening = true
+        // Cancel any ongoing speech
+        TTSManager.cancel()
 
-        STTManager.startListening(context = context, resultCallback = { spokenText ->
-            recognizedText.value = spokenText
-            processVoiceCommand(spokenText)
-        }, endOfSpeechCallback = {}, listeningStoppedCallback = {
-            isListening = false
-        })
+        isListening = true
+        STTManager.startListening(
+            context = context,
+            resultCallback = { spokenText ->
+                recognizedText.value = spokenText
+                processVoiceCommand(spokenText)
+            },
+            endOfSpeechCallback = {},
+            listeningStoppedCallback = { isListening = false }
+        )
+//        SpeechService.announce(context, "Listening")
 
         Toast.makeText(context, "Listening for command...", Toast.LENGTH_SHORT).show()
     }
@@ -79,7 +94,9 @@ class SpeechInputHandler(
 
         isListening = false
         STTManager.stopListening()
-        Toast.makeText(context, "Stopped listening", Toast.LENGTH_SHORT).show()
+//        SpeechService.announce(context, "Stopped listening")
+
+//        Toast.makeText(context, "Stopped listening", Toast.LENGTH_SHORT).show()
     }
 
     private fun processVoiceCommand(spokenText: String) {
@@ -88,7 +105,18 @@ class SpeechInputHandler(
         if (bestMatch != null) {
             val route = screenRoutes[bestMatch]  // Use corrected mapping
             if (route != null) {
-                navController.navigate(route)
+                val currentRoute = navController.currentDestination?.route
+
+// If the route contains parameters, extract only the base path before checking
+                val normalizedCurrentRoute = currentRoute?.substringBefore("/{")
+
+                if (normalizedCurrentRoute != route.substringBefore("/{")) {
+                    navController.navigate(route) {
+                        launchSingleTop = true // Prevent multiple instances of the same destination
+                        restoreState = true     // Restore state if available
+                    }
+                }
+
                 return
             }
         }
@@ -149,7 +177,6 @@ class SpeechInputHandler(
 
         return null // No match found
     }
-
 
 
     // Your original similarity matching function

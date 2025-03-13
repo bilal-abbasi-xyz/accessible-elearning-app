@@ -84,7 +84,7 @@ fun LogInScreen(
         TextField(
             value = viewModel.usernameOrEmail.value,
             onValueChange = { viewModel.usernameOrEmail.value = it },
-            label = { Text("Username or Email") },
+            label = { Text("Username") },
             modifier = Modifier.fillMaxWidth()
         )
 

@@ -29,10 +29,8 @@ class LectureRepository(
     }
 
     suspend fun addLecture(lecture: Lecture) {
-        // Save to Firestore
         firebaseService.addLecture(lecture)
 
-        // Save to Room (for offline support)
         lectureDao.insertLectures(listOf(lecture))
     }
 
