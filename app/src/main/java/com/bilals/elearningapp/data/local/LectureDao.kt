@@ -5,6 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import com.bilals.elearningapp.data.model.Lecture
 import com.bilals.elearningapp.data.model.quiz.Quiz
 import kotlinx.coroutines.flow.Flow
@@ -19,6 +20,9 @@ interface LectureDao {
     // Get the count of lectures by sectionId
     @Query("SELECT COUNT(*) FROM lectures WHERE sectionId = :sectionId")
     suspend fun getLectureCount(sectionId: String): Int
+
+    @Update
+    suspend fun updateLecture(lecture: Lecture)
 
     // Insert lectures into the database
     @Insert(onConflict = OnConflictStrategy.REPLACE)

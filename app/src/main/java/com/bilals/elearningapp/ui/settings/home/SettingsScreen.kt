@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.Icon
@@ -83,7 +84,7 @@ fun SettingsScreen(navController: NavController) {
                 val buttons = listOf(
                     "Profile" to Icons.Default.Person,
 //                    "Voice Commands" to Icons.Default.Mic,
-//                    "Page UI" to Icons.Default.Layers,
+                    "Page UI" to Icons.Default.Layers,
                     switchRoleText to Icons.Default.Sync
                 )
 

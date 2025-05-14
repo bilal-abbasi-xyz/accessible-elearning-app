@@ -226,6 +226,7 @@ fun navigateToScreen(label: String, navController: NavController) {
         "Browse Courses" -> navController.navigate(ScreenRoutes.CategoryList.route)
         "Settings" -> navController.navigate(ScreenRoutes.Settings.route)
         "Public Forum" -> navController.navigate(ScreenRoutes.PublicForum.route)
+        "Training" -> navController.navigate(ScreenRoutes.Training.route)
         "Login" -> navController.navigate(ScreenRoutes.Login.route)
     }
 }

@@ -16,15 +16,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.bilals.elearningapp.ui.theme.AppTypography
+import com.bilals.elearningapp.ui.theme.LocalAppCardContainerColor
+import com.bilals.elearningapp.ui.theme.LocalAppCardTextColor
 import com.bilals.elearningapp.ui.theme.PrimaryBlack
 
 @Composable
 fun AppBar(title: String, onBackClick: () -> Unit) {
+    val containerColor = LocalAppCardContainerColor.current
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(90.dp)
-            .background(PrimaryBlack),
+            .background(containerColor),
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (title != "Home") {
@@ -49,7 +53,7 @@ fun AppBar(title: String, onBackClick: () -> Unit) {
         Text(
             text = title.uppercase(),
             style = AppTypography.titleMedium.copy(fontSize = adjustedTextSize),
-            color = androidx.compose.ui.graphics.Color.White
+            color = LocalAppCardTextColor.current
         )
 //        }
     }

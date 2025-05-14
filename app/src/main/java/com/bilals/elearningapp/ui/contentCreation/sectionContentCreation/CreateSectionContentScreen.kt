@@ -1,5 +1,6 @@
 
 package com.bilals.elearningapp.ui.contentCreation.sectionContentCreation
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -101,8 +102,10 @@ fun CreateSectionContentScreen(
             SectionItems(
                 items = lectures,
                 sectionName = "Lectures",
-                onItemClick = { lecture ->
-                    navController.navigate(ScreenRoutes.ViewLecture.createRoute(lecture.id, lecture.name))
+                onItemClick = {
+                    lecture ->
+                    Log.d("lecture", "lecture in createsectionccontent:  ${lecture.id}")
+                    navController.navigate(ScreenRoutes.CreateLecture.createRoute(lecture.id, lecture.name, lecture.sectionId))
                 },
                 itemName = { lecture -> lecture.name }
             )

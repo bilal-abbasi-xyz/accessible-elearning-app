@@ -254,6 +254,24 @@ class FirebaseService {
         }
     }
 
+    suspend fun updateLecture(lecture: Lecture) {
+        val snapshot = firestore.collectionGroup("sections")
+            .whereEqualTo("id", lecture.sectionId)
+            .get()
+            .await()
+
+        val sectionDoc = snapshot.documents.firstOrNull()
+
+        if (sectionDoc != null) {
+            sectionDoc.reference.collection("lectures")
+                .document(lecture.id)
+                .set(lecture) // Will overwrite existing doc with new content
+                .await()
+        } else {
+            throw Exception("Section not found for sectionId: ${lecture.sectionId}")
+        }
+    }
+
 
     suspend fun getLectureById(lectureId: String): Lecture? {
         val snapshot = firestore.collection("lectures")

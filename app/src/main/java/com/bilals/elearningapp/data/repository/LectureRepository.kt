@@ -34,6 +34,12 @@ class LectureRepository(
         lectureDao.insertLectures(listOf(lecture))
     }
 
+    suspend fun updateLecture(lecture: Lecture) {
+        firebaseService.updateLecture(lecture)
+        lectureDao.updateLecture(lecture)
+    }
+
+
 
     // Fetch and store lectures if they are not already in the local Room database
     suspend fun syncLectures(sectionId: String) {

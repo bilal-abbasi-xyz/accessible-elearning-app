@@ -1,6 +1,8 @@
 package com.bilals.elearningapp.ui.auth.signup
 
 import android.widget.Toast
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,6 +34,9 @@ import androidx.navigation.compose.rememberNavController
 import com.bilals.elearningapp.data.repository.AuthRepository
 import com.bilals.elearningapp.navigation.ScreenRoutes
 import com.bilals.elearningapp.tts.SpeechService
+import com.bilals.elearningapp.ui.theme.AppTypography
+import com.bilals.elearningapp.ui.uiComponents.AppBar
+import com.bilals.elearningapp.ui.uiComponents.AppCard
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
@@ -72,23 +77,17 @@ fun SignUpScreen(navController: NavController) {
     }
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
+        modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(
-            text = "Sign Up",
-            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
+        AppBar(title = "Sign Up") { navController.popBackStack() }
+        Spacer(modifier = Modifier.height(24.dp))
 
         OutlinedTextField(
             value = userName.value,
             onValueChange = { userName.value = it },
             label = { Text("Username") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -97,7 +96,7 @@ fun SignUpScreen(navController: NavController) {
             value = email.value,
             onValueChange = { email.value = it },
             label = { Text("Email") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -106,7 +105,7 @@ fun SignUpScreen(navController: NavController) {
             value = password.value,
             onValueChange = { password.value = it },
             label = { Text("Password") },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
             visualTransformation = PasswordVisualTransformation()
         )
 
@@ -116,45 +115,87 @@ fun SignUpScreen(navController: NavController) {
             value = confirmPassword.value,
             onValueChange = { confirmPassword.value = it },
             label = { Text("Confirm Password") },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
             visualTransformation = PasswordVisualTransformation()
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         errorMessage?.let {
-            Text(text = it, color = Color.Red, modifier = Modifier.padding(8.dp))
+            Text(
+                text = it,
+                color = Color.Red,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+            )
         }
 
         successMessage?.let {
-            Text(text = it, color = Color.Green, modifier = Modifier.padding(8.dp))
+            Text(
+                text = it,
+                color = Color.Green,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+            )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Button(
-            onClick = {
-                viewModel.onCreateAccountClicked(
-                    userName.value,
-                    email.value,
-                    password.value,
-                    confirmPassword.value
-                )
-            },
-            modifier = Modifier.fillMaxWidth()
+        AppCard(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
+                    viewModel.onCreateAccountClicked(
+                        userName.value,
+                        email.value,
+                        password.value,
+                        confirmPassword.value
+                    )
+                }
         ) {
-            Text(text = "Create Account")
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Create Account",
+                    style = AppTypography.bodyLarge,
+                    color = Color.White
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        TextButton(
-            onClick = { navController.navigate(ScreenRoutes.Login.route) },
-            modifier = Modifier.fillMaxWidth()
+        AppCard(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
+                    navController.navigate(ScreenRoutes.Login.route) {
+                        popUpTo(ScreenRoutes.SignUp.route) { inclusive = true }
+                    }
+
+                }
         ) {
-            Text(text = "Already have an account?", style = MaterialTheme.typography.bodyMedium)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Already have an account?",
+                    style = AppTypography.bodyLarge,
+                    color = Color.White
+                )
+            }
         }
     }
+
 }
 
 @Preview(showBackground = true)

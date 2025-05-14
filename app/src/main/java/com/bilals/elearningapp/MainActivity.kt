@@ -44,6 +44,7 @@ import com.bilals.elearningapp.ui.auth.login.LogInScreen
 import com.bilals.elearningapp.ui.auth.signup.SignUpScreen
 import com.bilals.elearningapp.ui.auth.signup.SignUpViewModel
 import com.bilals.elearningapp.ui.browsing.publicForum.PublicForumScreen
+import com.bilals.elearningapp.ui.training.TrainingScreen
 import com.bilals.elearningapp.ui.contentCreation.browsing.categoryList.CategoryListScreen
 import com.bilals.elearningapp.ui.contentCreation.browsing.courseDetail.CourseDetailScreen
 import com.bilals.elearningapp.ui.contentCreation.browsing.courseForum.CourseForumScreen
@@ -53,12 +54,14 @@ import com.bilals.elearningapp.ui.contentCreation.browsing.lecture.ViewLectureSc
 import com.bilals.elearningapp.ui.contentCreation.browsing.quiz.AttemptQuizScreen
 import com.bilals.elearningapp.ui.contentCreation.browsing.resource.ViewResourceScreen
 import com.bilals.elearningapp.ui.contentCreation.browsing.sectionDetail.SectionDetailScreen
+import com.bilals.elearningapp.ui.contentCreation.createLecture.CreateLectureScreen
 import com.bilals.elearningapp.ui.contentCreation.createQuiz.CreateQuizScreen
 import com.bilals.elearningapp.ui.contentCreation.sectionContentCreation.CreateSectionContentScreen
 import com.bilals.elearningapp.ui.contentCreation.unpublishedCourses.UnpublishedCourseListScreen
 import com.bilals.elearningapp.ui.instructor.InstructorHomeScreen
 import com.bilals.elearningapp.ui.settings.profile.ProfileSettingsScreen
 import com.bilals.elearningapp.ui.settings.home.SettingsScreen
+import com.bilals.elearningapp.ui.settings.ui.UISettingsScreen
 import com.bilals.elearningapp.ui.theme.AppTheme
 import com.bilals.elearningapp.ui.welcomeScreen.WelcomeScreen
 import com.google.firebase.auth.FirebaseAuth
@@ -277,6 +280,15 @@ fun AppNavHost(navController: NavHostController, appContainer: AppContainer) {
         composable(ScreenRoutes.Settings.route) {
             SettingsScreen(navController = navController)
         }
+
+
+        composable(ScreenRoutes.UISettings.route) {
+            UISettingsScreen(navController = navController)
+        }
+
+        composable(ScreenRoutes.Training.route) {
+            TrainingScreen(navController = navController)
+        }
         composable(ScreenRoutes.ProfileSettings.route) {
             ProfileSettingsScreen(navController = navController)
         }
@@ -324,6 +336,16 @@ fun AppNavHost(navController: NavHostController, appContainer: AppContainer) {
             val quizName = backStackEntry.arguments?.getString("quizName") ?: ""
             CreateQuizScreen(
                 navController = navController, quizId = quizId, quizName = quizName, appContainer
+            )
+        }
+
+        composable(ScreenRoutes.CreateLecture.route) { backStackEntry ->
+            val lectureId = backStackEntry.arguments?.getString("lectureId") ?: ""
+            val lectureName = backStackEntry.arguments?.getString("lectureName") ?: ""
+            val sectionId = backStackEntry.arguments?.getString("sectionId") ?: ""
+            CreateLectureScreen(
+                navController = navController, lectureId = lectureId,
+                lectureName = lectureName, sectionId = sectionId, appContainer
             )
         }
     }

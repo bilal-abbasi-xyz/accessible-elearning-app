@@ -65,4 +65,8 @@ sealed class ScreenRoutes(val route: String) {
         fun createRoute(quizId: String, quizName: String) = "createQuiz/$quizId/$quizName"
     }
 
+    object CreateLecture : ScreenRoutes("createLecture/{lectureId}/{lectureName}/{sectionId}") {
+        fun createRoute(lectureId: String, lectureName: String, sectionId: String) = "createLecture/$lectureId/$lectureName/$sectionId"
+    }
+
 }
