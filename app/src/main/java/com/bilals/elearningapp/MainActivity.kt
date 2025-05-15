@@ -44,6 +44,7 @@ import com.bilals.elearningapp.ui.auth.login.LogInScreen
 import com.bilals.elearningapp.ui.auth.signup.SignUpScreen
 import com.bilals.elearningapp.ui.auth.signup.SignUpViewModel
 import com.bilals.elearningapp.ui.browsing.publicForum.PublicForumScreen
+import com.bilals.elearningapp.ui.browsing.report.ReportScreen
 import com.bilals.elearningapp.ui.training.TrainingScreen
 import com.bilals.elearningapp.ui.contentCreation.browsing.categoryList.CategoryListScreen
 import com.bilals.elearningapp.ui.contentCreation.browsing.courseDetail.CourseDetailScreen
@@ -289,6 +290,11 @@ fun AppNavHost(navController: NavHostController, appContainer: AppContainer) {
         composable(ScreenRoutes.Training.route) {
             TrainingScreen(navController = navController)
         }
+
+        composable(ScreenRoutes.Report.route) {
+            ReportScreen(navController = navController)
+        }
+
         composable(ScreenRoutes.ProfileSettings.route) {
             ProfileSettingsScreen(navController = navController)
         }

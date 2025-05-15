@@ -21,7 +21,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.ChatBubble
+import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.Newspaper
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
@@ -203,6 +205,7 @@ fun HomeScreenButton(label: String, onClick: () -> Unit) {
                             "Settings" -> Icons.Default.Settings
                             "Public Forum" -> Icons.Default.ChatBubble
                             "Login" -> Icons.Default.Person
+                            "Report" -> Icons.Default.Description
                             else -> Icons.AutoMirrored.Filled.Help
                         },
                         contentDescription = "",
@@ -228,16 +231,8 @@ fun navigateToScreen(label: String, navController: NavController) {
         "Public Forum" -> navController.navigate(ScreenRoutes.PublicForum.route)
         "Training" -> navController.navigate(ScreenRoutes.Training.route)
         "Login" -> navController.navigate(ScreenRoutes.Login.route)
+        "Reports" -> navController.navigate(ScreenRoutes.Report.route)
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewHomeScreen() {
-    val navController = rememberNavController() // Mock NavController
-    // Mock button labels for preview
-    val buttonLabels = listOf("Browse Courses", "Settings", "Training", "Login")
-    HomeScreen(navController = navController)
 }
 
 

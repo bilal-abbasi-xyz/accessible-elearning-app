@@ -5,6 +5,7 @@ sealed class ScreenRoutes(val route: String) {
 
     object WelcomeScreen : ScreenRoutes("welcomeScreen")
     object Home : ScreenRoutes("home")
+    object Report : ScreenRoutes("report")
     object CategoryList : ScreenRoutes("categoryList")
     object CourseList : ScreenRoutes("courseList/{categoryId}/{categoryName}") {
         fun createRoute(categoryId: String, categoryName: String) =
@@ -64,6 +65,7 @@ sealed class ScreenRoutes(val route: String) {
     object CreateQuiz : ScreenRoutes("createQuiz/{quizId}/{quizName}") {
         fun createRoute(quizId: String, quizName: String) = "createQuiz/$quizId/$quizName"
     }
+
 
     object CreateLecture : ScreenRoutes("createLecture/{lectureId}/{lectureName}/{sectionId}") {
         fun createRoute(lectureId: String, lectureName: String, sectionId: String) = "createLecture/$lectureId/$lectureName/$sectionId"

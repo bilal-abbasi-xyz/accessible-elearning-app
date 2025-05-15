@@ -76,79 +76,50 @@ fun SettingsScreen(navController: NavController) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 200.dp),
-                verticalArrangement = Arrangement.spacedBy(0.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp) // space between buttons
             ) {
-//                Spacer(modifier = Modifier.height(40.dp))
-
-                // Buttons list
                 val buttons = listOf(
                     "Profile" to Icons.Default.Person,
-//                    "Voice Commands" to Icons.Default.Mic,
                     "Page UI" to Icons.Default.Layers,
                     switchRoleText to Icons.Default.Sync
                 )
 
-                val rows = buttons.chunked(2) // Create rows of two buttons
-
-                rows.forEach { rowItems ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                buttons.forEach { (label, icon) ->
+                    // Full-width tappable area for TalkBack, but card stays at its defined size
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { /* same onClick logic as before */ }
+                            .semantics { contentDescription = label } // spans the full width
                     ) {
-                        rowItems.forEach { (label, icon) ->
+                        // Center the fixed-size AppCard
+                        AppCard(
+                            modifier = Modifier
+                                .width(200.dp)
+                                .height(200.dp / 1.618f)
+                                .align(Alignment.Center)
+                        ) {
                             Box(
-                                modifier = Modifier.weight(1f)
+                                Modifier
+                                    .fillMaxSize()
+                                    .padding(16.dp),
+                                contentAlignment = Alignment.Center
                             ) {
-                                SettingsScreenButton(
-                                    label = label,
-                                    icon = icon,
-                                    onClick = {
-                                        when (label) {
-                                            "Log in for Instructor Role" -> {
-                                                navController.navigate(ScreenRoutes.Login.route)
-                                            }
-
-                                            "Switch to Instructor Role" -> {
-                                                SessionManager.saveActiveRole(
-                                                    RoleType.INSTRUCTOR,
-                                                    context
-                                                )
-                                                activeRole.value = RoleType.INSTRUCTOR
-                                                navController.navigate(ScreenRoutes.InstructorHome.route) {
-                                                    popUpTo(0) {
-                                                        inclusive = true
-                                                    } // Clears the entire back stack
-                                                    launchSingleTop =
-                                                        true // Prevents duplicate instances
-                                                }
-                                            }
-
-                                            "Switch to Student Role" -> {
-                                                SessionManager.saveActiveRole(
-                                                    RoleType.STUDENT,
-                                                    context
-                                                )
-                                                activeRole.value = RoleType.STUDENT
-                                                navController.navigate(ScreenRoutes.Home.route) {
-                                                    popUpTo(0) {
-                                                        inclusive = true
-                                                    } // Clears the entire back stack
-                                                    launchSingleTop =
-                                                        true // Prevents duplicate instances
-                                                }
-                                            }
-
-
-                                            else -> {
-                                                navigateToSettingsScreen(label, navController)
-                                            }
-                                        }
-                                    }
-                                )
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center
+                                ) {
+                                    Icon(icon, contentDescription = "", tint = Color.White)
+                                    Spacer(Modifier.height(8.dp))
+                                    Text(
+                                        text = label,
+                                        style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp),
+                                        color = Color.White,
+                                        textAlign = TextAlign.Center
+                                    )
+                                }
                             }
                         }
-
-                        if (rowItems.size == 1) Spacer(modifier = Modifier.weight(1f)) // Balance layout
                     }
                 }
             }
