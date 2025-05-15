@@ -1,0 +1,12 @@
+fix exception
+add audio chat and lectures
+report
+admin
+quiz marks
+widen selectable area for everything 
+voice commands
+change settings to vertiacal arrangment
+change to volume up + power
+font
+TUTORIAL add voice command guide
+remove resources

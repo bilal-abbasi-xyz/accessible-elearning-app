@@ -1,23 +1,18 @@
 package com.bilals.elearningapp.ui.theme
 
-import android.util.Log
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
-import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
+import com.bilals.elearningapp.ui.settings.ui.UISettingsViewModel
 
 data class AppColorPattern(
     val background: Color,
@@ -44,13 +39,35 @@ object AppColors {
 }
 
 
-
 val LocalAppCardTextColor = staticCompositionLocalOf { Color.White }
 val LocalAppCardContainerColor = staticCompositionLocalOf { Color.Black }
 
 @Composable
-fun AppTheme(content: @Composable () -> Unit) {
+fun AppTheme(
+    uiSettings: UISettingsViewModel, // exposes chosenFontIndex: Int
+    content: @Composable () -> Unit
+) {
     val pattern = AppColors.currentPattern.value
+    // ❶ pick the family
+    val chosenFamily = fontOptions
+        .getOrElse(uiSettings.chosenFontIndex) { fontOptions[0] }
+
+    // ❷ build a matching Typography
+    val dynamicTypography = Typography(
+        bodyLarge = TextStyle(fontFamily = chosenFamily, fontSize = 20.sp),
+        bodyMedium = TextStyle(fontFamily = chosenFamily, fontSize = 16.sp),
+        bodySmall = TextStyle(fontFamily = chosenFamily, fontSize = 12.sp),
+        titleLarge = TextStyle(
+            fontFamily = chosenFamily, fontSize = 40.sp,
+            fontWeight = FontWeight.Bold
+        ),
+        titleMedium = TextStyle(
+            fontFamily = chosenFamily, fontSize = 30.sp,
+            fontWeight = FontWeight.Bold
+        ),
+        // …and so on for the styles you care about…
+    )
+
     CompositionLocalProvider(
         LocalAppCardContainerColor provides pattern.cardColor,
         LocalAppCardTextColor provides pattern.textOnCard,
@@ -63,7 +80,7 @@ fun AppTheme(content: @Composable () -> Unit) {
 
                 background = pattern.background
             ),
-            typography = AppTypography,
+            typography = dynamicTypography,
             shapes = AppShapes,
             content = content
         )

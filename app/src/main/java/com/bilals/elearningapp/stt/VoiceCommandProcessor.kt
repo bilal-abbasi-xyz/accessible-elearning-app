@@ -27,9 +27,9 @@ class VoiceCommandProcessor(
     fun processCommand(spokenText: String) {
         CoroutineScope(Dispatchers.IO).launch {
             val categoryKeywords = listOf("category", "categories")
-            val courseKeywords = listOf("course", "courses")
+            val courseKeywords = listOf("course", "courses", "core")
             val sectionKeywords = listOf("section", "sections")
-            val quizKeywords = listOf("quiz", "quizzes")
+            val quizKeywords = listOf("quiz", "quizzes", "test", "assignment")
             val lectureKeywords = listOf("lecture", "lectures")
             val resourceKeywords = listOf("resource", "resources")
 

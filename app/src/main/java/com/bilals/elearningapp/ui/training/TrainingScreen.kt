@@ -237,8 +237,12 @@ fun TrainingScreen(navController: NavController) {
                             .fillMaxHeight(0.9f)
                             .padding(16.dp)
                     ) {
-                        Column(Modifier.fillMaxSize()) {
-                            // Top toolbar: H, B, L
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(16.dp),            // apply padding here
+                            verticalArrangement = Arrangement.SpaceBetween // push button to bottom
+                        ) {                            // Top toolbar: H, B, L
                             Row(
                                 Modifier
                                     .fillMaxWidth()
@@ -329,7 +333,6 @@ fun TrainingScreen(navController: NavController) {
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(56.dp)
-                                    .padding(16.dp)
                             ) {
                                 Box(Modifier.fillMaxSize(), Alignment.Center) {
                                     Text("Preview", fontSize = 18.sp, color = Color.White)
@@ -337,50 +340,53 @@ fun TrainingScreen(navController: NavController) {
                             }
                         }
                     }
-                }
-
-                // Reuse your existing dark preview dialog here:
-                if (showPreview) {
-                    Dialog(onDismissRequest = { showPreview = false }) {
-                        Surface(
-                            shape = MaterialTheme.shapes.medium,
-                            tonalElevation = 8.dp,
-                            color = Color.Black.copy(alpha = 0.85f),
-                            modifier = Modifier
-                                .fillMaxWidth(0.9f)
-                                .fillMaxHeight(0.8f)
-                                .padding(16.dp)
-                        ) {
-                            Column(
-                                Modifier
-                                    .fillMaxSize()
+                    // Reuse your existing dark preview dialog here:
+                    if (showPreview) {
+                        Dialog(onDismissRequest = { showPreview = false }) {
+                            Surface(
+                                shape = MaterialTheme.shapes.medium,
+                                tonalElevation = 8.dp,
+                                color = Color.Black.copy(alpha = 0.85f),
+                                modifier = Modifier
+                                    .fillMaxWidth(0.9f)
+                                    .fillMaxHeight(0.8f)
                                     .padding(16.dp)
-                                    .verticalScroll(rememberScrollState()),
-                                verticalArrangement = Arrangement.SpaceBetween
                             ) {
-                                val markwon = remember { Markwon.create(context) }
-                                AndroidView(
-                                    factory = { ctx ->
-                                        TextView(ctx).apply { setTextColor(Color.White.toArgb()) }
-                                    },
-                                    update = { tv ->
-                                        // normalize newlines
-                                        val raw = textState.text
-                                        val step1 = raw.replace("\\\\n", "\n\n")
-                                        val display = step1.replace("\n", "\n\n")
-                                        markwon.setMarkdown(tv, display)
-                                    },
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                                AppCard(
-                                    onClick = { showPreview = false },
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(56.dp)
-                                        .padding(top = 16.dp)
+                                Column(
+                                    Modifier
+                                        .fillMaxSize()
+                                        .padding(16.dp)
+                                        .verticalScroll(rememberScrollState()),
+                                    verticalArrangement = Arrangement.SpaceBetween
                                 ) {
-                                    Box(Modifier.fillMaxSize(), Alignment.Center) {
-                                        Text("Close Preview", fontSize = 18.sp, color = Color.White)
+                                    val markwon = remember { Markwon.create(context) }
+                                    AndroidView(
+                                        factory = { ctx ->
+                                            TextView(ctx).apply { setTextColor(Color.White.toArgb()) }
+                                        },
+                                        update = { tv ->
+                                            // normalize newlines
+                                            val raw = textState.text
+                                            val step1 = raw.replace("\\\\n", "\n\n")
+                                            val display = step1.replace("\n", "\n\n")
+                                            markwon.setMarkdown(tv, display)
+                                        },
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                    AppCard(
+                                        onClick = { showPreview = false },
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(56.dp)
+                                            .padding(top = 16.dp)
+                                    ) {
+                                        Box(Modifier.fillMaxSize(), Alignment.Center) {
+                                            Text(
+                                                "Close Preview",
+                                                fontSize = 18.sp,
+                                                color = Color.White
+                                            )
+                                        }
                                     }
                                 }
                             }

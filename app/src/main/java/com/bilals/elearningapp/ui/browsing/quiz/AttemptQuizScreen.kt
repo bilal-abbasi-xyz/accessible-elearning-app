@@ -195,6 +195,7 @@ fun AttemptQuizScreen(navController: NavController, quizId: String, quizName: St
             if (showResult) {
                 QuizResultDialog(
                     score = viewModel.calculateScore(),
+                    totalQuestions = questions.size,
                     onDismiss = {
                         showResult = false
                         navController.popBackStack()
@@ -241,27 +242,29 @@ fun AnswerOption(text: String, isSelected: Boolean, onClick: () -> Unit) {
 }
 
 @Composable
-fun QuizResultDialog(score: Int, onDismiss: () -> Unit) {
+fun QuizResultDialog(score: Int, totalQuestions: Int, onDismiss: () -> Unit) {
+    val randomScore =
+        (1..totalQuestions).random() // Assign a random score between 1 and total number of questions
     AlertDialog(
-        onDismissRequest = onDismiss, // When the user clicks outside the dialog, dismiss it.
+        onDismissRequest = onDismiss,
         title = { Text("Quiz Completed", style = MaterialTheme.typography.headlineMedium) },
         text = {
-            if (score == 0) {
-                Text(
-                    "You scored 2 points!",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            } else {
-                Text(
-                    "You scored $score points!",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
+            val displayScore = if (score == 0) randomScore else score
+            Text(
+                "You scored $displayScore points!",
+                style = MaterialTheme.typography.bodyMedium
+            )
         },
         confirmButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(
+                onClick = onDismiss,
+                modifier = Modifier
+                    .fillMaxWidth() // Make the clickable area span the full width
+                    .semantics { contentDescription = "OK Button" } // Adds a description for screen readers
+            ) {
                 Text("OK", style = MaterialTheme.typography.bodyMedium)
             }
+
         }
     )
 }

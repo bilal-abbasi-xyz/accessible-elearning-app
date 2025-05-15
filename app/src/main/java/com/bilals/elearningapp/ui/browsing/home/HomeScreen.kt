@@ -19,12 +19,16 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Help
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Assessment
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.ChatBubble
 import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.Newspaper
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -204,8 +208,10 @@ fun HomeScreenButton(label: String, onClick: () -> Unit) {
                             "Browse Courses" -> Icons.Default.Book
                             "Settings" -> Icons.Default.Settings
                             "Public Forum" -> Icons.Default.ChatBubble
-                            "Login" -> Icons.Default.Person
-                            "Report" -> Icons.Default.Description
+                            "Log in"    -> Icons.Filled.AccountCircle
+                            "Log out"    -> Icons.Filled.AccountCircle
+                            "Reports"   -> Icons.Filled.Email
+                            "Training" -> Icons.Filled.School
                             else -> Icons.AutoMirrored.Filled.Help
                         },
                         contentDescription = "",

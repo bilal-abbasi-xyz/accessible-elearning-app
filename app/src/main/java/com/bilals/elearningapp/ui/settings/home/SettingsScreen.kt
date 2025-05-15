@@ -41,7 +41,6 @@ import com.bilals.elearningapp.navigation.ScreenRoutes
 import com.bilals.elearningapp.SessionManager
 import com.bilals.elearningapp.ui.uiComponents.AppBar
 import com.bilals.elearningapp.ui.uiComponents.AppCard
-
 @Composable
 fun SettingsScreen(navController: NavController) {
     val context = LocalContext.current
@@ -61,23 +60,24 @@ fun SettingsScreen(navController: NavController) {
             .fillMaxSize()
             .background(Color(0xFFEAEAEA))
     ) {
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(bottom = 60.dp)
                 .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally,
-//            verticalArrangement = Arrangement.Center
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             AppBar(title = "Settings") { navController.popBackStack() }
 
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 200.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp) // space between buttons
+                    .padding(horizontal = 16.dp, vertical = 100.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally // <-- This centers the inner Column itself
+
             ) {
+                // Buttons list
                 val buttons = listOf(
                     "Profile" to Icons.Default.Person,
                     "Page UI" to Icons.Default.Layers,
@@ -85,39 +85,38 @@ fun SettingsScreen(navController: NavController) {
                 )
 
                 buttons.forEach { (label, icon) ->
-                    // Full-width tappable area for TalkBack, but card stays at its defined size
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { /* same onClick logic as before */ }
-                            .semantics { contentDescription = label } // spans the full width
+                    SettingsScreenButton(
+                        label = label,
+                        icon = icon
                     ) {
-                        // Center the fixed-size AppCard
-                        AppCard(
-                            modifier = Modifier
-                                .width(200.dp)
-                                .height(200.dp / 1.618f)
-                                .align(Alignment.Center)
-                        ) {
-                            Box(
-                                Modifier
-                                    .fillMaxSize()
-                                    .padding(16.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.Center
-                                ) {
-                                    Icon(icon, contentDescription = "", tint = Color.White)
-                                    Spacer(Modifier.height(8.dp))
-                                    Text(
-                                        text = label,
-                                        style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp),
-                                        color = Color.White,
-                                        textAlign = TextAlign.Center
-                                    )
+                        when (label) {
+                            "Log in for Instructor Role" -> {
+                                navController.navigate(ScreenRoutes.Login.route)
+                            }
+                            "Switch to Instructor Role" -> {
+                                SessionManager.saveActiveRole(
+                                    RoleType.INSTRUCTOR,
+                                    context
+                                )
+                                activeRole.value = RoleType.INSTRUCTOR
+                                navController.navigate(ScreenRoutes.InstructorHome.route) {
+                                    popUpTo(0) { inclusive = true }
+                                    launchSingleTop = true
                                 }
+                            }
+                            "Switch to Student Role" -> {
+                                SessionManager.saveActiveRole(
+                                    RoleType.STUDENT,
+                                    context
+                                )
+                                activeRole.value = RoleType.STUDENT
+                                navController.navigate(ScreenRoutes.Home.route) {
+                                    popUpTo(0) { inclusive = true }
+                                    launchSingleTop = true
+                                }
+                            }
+                            else -> {
+                                navigateToSettingsScreen(label, navController)
                             }
                         }
                     }
@@ -126,6 +125,7 @@ fun SettingsScreen(navController: NavController) {
         }
     }
 }
+
 
 @Composable
 fun SettingsScreenButton(

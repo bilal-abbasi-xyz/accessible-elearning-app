@@ -28,6 +28,7 @@ import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -63,6 +64,7 @@ import com.bilals.elearningapp.ui.instructor.InstructorHomeScreen
 import com.bilals.elearningapp.ui.settings.profile.ProfileSettingsScreen
 import com.bilals.elearningapp.ui.settings.home.SettingsScreen
 import com.bilals.elearningapp.ui.settings.ui.UISettingsScreen
+import com.bilals.elearningapp.ui.settings.ui.UISettingsViewModel
 import com.bilals.elearningapp.ui.theme.AppTheme
 import com.bilals.elearningapp.ui.welcomeScreen.WelcomeScreen
 import com.google.firebase.auth.FirebaseAuth
@@ -93,8 +95,11 @@ class MainActivity : ComponentActivity() {
         initializeManagers()
 
         setContent {
-            AppTheme {
-                AppContent(context = this)
+            val uiSettings: UISettingsViewModel = viewModel()
+
+            // ❷ Wrap your whole app in the theme, passing the VM
+            AppTheme(uiSettings = uiSettings) {
+                AppContent(context = this, uiSettings)
             }
         }
     }
@@ -128,7 +133,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun AppContent(context: Context) {
+fun AppContent(context: Context, uiSettingsViewModel: UISettingsViewModel) {
     val context = LocalContext.current
 
     val appContainer = AppContainer(context) // Initialize DI container
@@ -146,8 +151,12 @@ fun AppContent(context: Context) {
     HandleSwipeGestures(speechInputHandler)
     RecognizedTextDisplay(recognizedText, context)
     SessionManager.saveActiveRole(RoleType.STUDENT, context)
-    AppNavHost(navController, appContainer)
-}
+    AppNavHost(
+        navController       = navController,
+        appContainer        = appContainer,
+        speechInputHandler  = speechInputHandler,
+        uiViewModel = uiSettingsViewModel
+    )}
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -198,7 +207,12 @@ fun RecognizedTextDisplay(recognizedText: MutableState<String>, context: Context
 }
 
 @Composable
-fun AppNavHost(navController: NavHostController, appContainer: AppContainer) {
+fun AppNavHost(
+    navController: NavHostController,
+    appContainer: AppContainer,
+    speechInputHandler: SpeechInputHandler,
+    uiViewModel: UISettingsViewModel = viewModel()
+) {
 
     NavHost(
         navController = navController, startDestination = ScreenRoutes.WelcomeScreen.route
@@ -284,7 +298,7 @@ fun AppNavHost(navController: NavHostController, appContainer: AppContainer) {
 
 
         composable(ScreenRoutes.UISettings.route) {
-            UISettingsScreen(navController = navController)
+            UISettingsScreen(navController = navController, uiSettings = uiViewModel)
         }
 
         composable(ScreenRoutes.Training.route) {
@@ -351,7 +365,7 @@ fun AppNavHost(navController: NavHostController, appContainer: AppContainer) {
             val sectionId = backStackEntry.arguments?.getString("sectionId") ?: ""
             CreateLectureScreen(
                 navController = navController, lectureId = lectureId,
-                lectureName = lectureName, sectionId = sectionId, appContainer
+                lectureName = lectureName, sectionId = sectionId, appContainer,
             )
         }
     }

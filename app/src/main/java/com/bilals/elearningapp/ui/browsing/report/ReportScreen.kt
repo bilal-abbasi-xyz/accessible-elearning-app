@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -65,6 +66,7 @@ import com.bilals.elearningapp.ui.uiComponents.HorizontalDividerWithDots
 fun ReportScreen(navController: NavController) {
     val user = FirebaseAuth.getInstance().currentUser
     val context = LocalContext.current
+
     var showQuizReport by remember { mutableStateOf(false) }
     var showChatReport by remember { mutableStateOf(false) }
     var showCourseReport by remember { mutableStateOf(false) }
@@ -72,13 +74,13 @@ fun ReportScreen(navController: NavController) {
     if (user == null) {
         // Not logged in
         Box(
-            Modifier
+            modifier = Modifier
                 .fillMaxSize()
                 .background(Color(0xFFEAEAEA)),
             contentAlignment = Alignment.Center
         ) {
             Text(
-                "Log in to see your reports",
+                text = "Log in to see your reports",
                 fontSize = 18.sp,
                 color = Color.Gray
             )
@@ -86,44 +88,58 @@ fun ReportScreen(navController: NavController) {
         return
     }
 
-    // Logged in: pull a display name or email
+    // Logged in
     val username = user.displayName ?: user.email ?: "User"
 
-    Column(Modifier.fillMaxSize()) {
-        AppBar(title = "Reports for $username") {
-            navController.popBackStack()
-        }
+    AppBar(title = "Reports for $username") {
+        navController.popBackStack()
+    }
 
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFEAEAEA))
+            .padding(16.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Three centered buttons
         Column(
-            Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // My Quizzes
-            AppCard(onClick = { showQuizReport = true }, modifier = Modifier
-                .fillMaxWidth()
-                .height(64.dp)
+            AppCard(
+                onClick = { showQuizReport = true },
+                modifier = Modifier
+                    .fillMaxWidth(0.8f)
+                    .height(64.dp)
             ) {
                 Box(Modifier.fillMaxSize(), Alignment.Center) {
                     Text("My Quizzes", fontSize = 18.sp, color = Color.White)
                 }
             }
 
-            // My Chats
-            AppCard(onClick = { showChatReport = true }, modifier = Modifier
-                .fillMaxWidth()
-                .height(64.dp)
+            AppCard(
+                onClick = { showChatReport = true },
+                modifier = Modifier
+                    .fillMaxWidth(0.8f)
+                    .height(64.dp)
             ) {
                 Box(Modifier.fillMaxSize(), Alignment.Center) {
                     Text("My Chats", fontSize = 18.sp, color = Color.White)
                 }
             }
 
-            // My Courses
-            AppCard(onClick = { showCourseReport = true }, modifier = Modifier
-                .fillMaxWidth()
-                .height(64.dp)
+            AppCard(
+                onClick = { showCourseReport = true },
+                modifier = Modifier
+                    .fillMaxWidth(0.8f)
+                    .height(64.dp)
             ) {
                 Box(Modifier.fillMaxSize(), Alignment.Center) {
                     Text("My Courses", fontSize = 18.sp, color = Color.White)
@@ -140,18 +156,23 @@ fun ReportScreen(navController: NavController) {
                 tonalElevation = 8.dp,
                 color = Color.White,
                 modifier = Modifier
-                    .fillMaxWidth(0.9f)
+                    .fillMaxWidth(0.95f)
+                    .wrapContentHeight()
                     .padding(16.dp)
             ) {
                 Column(
-                    Modifier
+                    modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically)
                 ) {
-                    Text("Quiz Report", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                    Text(
+                        text = "Quiz Report",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
 
-                    // Dummy data rows
                     ReportRow("No. of attempted quizzes", "5")
                     ReportRow(
                         "Courses in which quiz is attempted",
@@ -159,7 +180,8 @@ fun ReportScreen(navController: NavController) {
                     )
                     ReportRow("Overall performance", "78%")
 
-                    // Close
+                    Spacer(modifier = Modifier.height(8.dp))
+
                     AppCard(
                         onClick = { showQuizReport = false },
                         modifier = Modifier
@@ -183,19 +205,27 @@ fun ReportScreen(navController: NavController) {
                 tonalElevation = 8.dp,
                 color = Color.White,
                 modifier = Modifier
-                    .fillMaxWidth(0.9f)
+                    .fillMaxWidth(0.95f)
+                    .wrapContentHeight()
                     .padding(16.dp)
             ) {
                 Column(
-                    Modifier
+                    modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically)
                 ) {
-                    Text("Chat Report", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                    Text(
+                        text = "Chat Report",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
 
                     ReportRow("No. of chat messages sent", "42")
                     ReportRow("Most active in course forum for", "Data Structures")
+
+                    Spacer(modifier = Modifier.height(8.dp))
 
                     AppCard(
                         onClick = { showChatReport = false },
@@ -220,16 +250,22 @@ fun ReportScreen(navController: NavController) {
                 tonalElevation = 8.dp,
                 color = Color.White,
                 modifier = Modifier
-                    .fillMaxWidth(0.9f)
+                    .fillMaxWidth(0.95f)
+                    .wrapContentHeight()
                     .padding(16.dp)
             ) {
                 Column(
-                    Modifier
+                    modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically)
                 ) {
-                    Text("Course Report", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                    Text(
+                        text = "Course Report",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
 
                     ReportRow("No. of courses published", "3")
                     ReportRow("No. of lectures created", "24")
@@ -238,6 +274,8 @@ fun ReportScreen(navController: NavController) {
                         "My courses",
                         "Programming\nData Structures\nCompose UI"
                     )
+
+                    Spacer(modifier = Modifier.height(8.dp))
 
                     AppCard(
                         onClick = { showCourseReport = false },
@@ -259,9 +297,21 @@ fun ReportScreen(navController: NavController) {
 private fun ReportRow(key: String, value: String) {
     Row(
         Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(key, fontSize = 16.sp, color = Color.DarkGray)
-        Text(value, fontSize = 16.sp, textAlign = TextAlign.End)
+        Text(
+            text = key,
+            fontSize = 16.sp,
+            color = Color.DarkGray,
+            modifier = Modifier.weight(1f)
+        )
+        Text(
+            text = value,
+            fontSize = 16.sp,
+            textAlign = TextAlign.End,
+            modifier = Modifier.weight(2f)
+        )
     }
 }
+

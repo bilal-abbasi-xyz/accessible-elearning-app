@@ -10,6 +10,15 @@ import com.bilals.elearningapp.R
 
 val lexendFont = FontFamily(Font(R.font.lexend))
 val josefinSansFont = FontFamily(Font(R.font.josefin_sans))
+val fontOptions = listOf(
+    FontFamily(Font(R.font.lexend)),
+    FontFamily(Font(R.font.josefin_sans)),
+    FontFamily.Serif,
+    FontFamily.SansSerif,
+    FontFamily.Monospace
+)
+val fontNames = listOf("Lexend","Josefin Sans","Serif","Sans Serif","Monospace")
+
 //
 //val lexendFont = FontFamily.Serif // Use this for previewing
 //val josefinSansFont = FontFamily.Serif

@@ -6,7 +6,6 @@ import android.widget.Toast
 import androidx.compose.runtime.MutableState
 import androidx.navigation.NavController
 import com.bilals.elearningapp.navigation.ScreenRoutes
-import com.bilals.elearningapp.tts.SpeechService
 import com.bilals.elearningapp.tts.TTSManager
 import org.apache.commons.text.similarity.CosineSimilarity
 
@@ -16,7 +15,13 @@ class SpeechInputHandler(
     private val recognizedText: MutableState<String>,
     private val commandProcessor: VoiceCommandProcessor
 
+
 ) {
+
+    var onSpeechHeading: (() -> Unit)? = null
+    var onSpeechBold:    (() -> Unit)? = null
+    var onSpeechList:    (() -> Unit)? = null
+    var onSpeechNewLine: (() -> Unit)? = null
 
     var isListening = false
         private set
@@ -29,13 +34,22 @@ class SpeechInputHandler(
         "sign up" to ScreenRoutes.SignUp.route,
         "categories" to ScreenRoutes.CategoryList.route,
         "home screen" to ScreenRoutes.Home.route,
-        "public forum" to ScreenRoutes.PublicForum.route
+        "public forum" to ScreenRoutes.PublicForum.route,
+        "training" to ScreenRoutes.Training.route,
+        "reports" to ScreenRoutes.Report.route,
+        "report" to ScreenRoutes.Report.route,
+        "page UI" to ScreenRoutes.UISettings.route
     )
 
 
     private val commandVariations = mapOf(
         "settings" to listOf("settings", "open settings", "modify settings", "show settings"),
-        "profile settings" to listOf("profile settings", "edit profile", "update profile", "profile"),
+        "profile settings" to listOf(
+            "profile settings",
+            "edit profile",
+            "update profile",
+            "profile"
+        ),
         "voice settings" to listOf(
             "voice settings",
             "adjust voice",
@@ -45,8 +59,11 @@ class SpeechInputHandler(
         "login" to listOf("login", "sign in", "log in", "log into my account"),
         "sign up" to listOf("sign up", "register", "create an account", "join now"),
         "categories" to listOf("categories", "browse courses", "show courses"),
-        "public forum" to listOf("public forum", "public", "forum"),
-        "home screen" to listOf("home screen", "home", "ham")
+        "public forum" to listOf("public forum", "public", "forum", "form", "public form"),
+        "home screen" to listOf("home screen", "home", "ham"),
+        "training" to listOf("guide", "training", "tutorial"),
+        "reports" to listOf("report generation", "report generation", "report"),
+        "report" to listOf("reports generation", "reports")
     )
 
     private val synonyms = mapOf(
@@ -65,6 +82,8 @@ class SpeechInputHandler(
         "public forum" to listOf("public forum", "chat", "forum", "public"),
 
         "home screen" to listOf("home screen", "home", "ham"),
+        "training" to listOf("guide", "training", "tutorial"),
+        "reports" to listOf("report generation", "report")
     )
 
 
@@ -100,6 +119,20 @@ class SpeechInputHandler(
     }
 
     private fun processVoiceCommand(spokenText: String) {
+        // 1) check if we’re on CreateLectureScreen
+        val currentRoute = navController.currentDestination
+            ?.route
+            ?.substringBefore("/{")
+        if (currentRoute == ScreenRoutes.CreateLecture.route) {
+            when(spokenText.lowercase().trim()) {
+                "heading"   -> onSpeechHeading?.invoke().also { return }
+                "bold"      -> onSpeechBold?.invoke().also    { return }
+                "list"      -> onSpeechList?.invoke().also    { return }
+                "new line"  -> onSpeechNewLine?.invoke().also { return }
+            }
+        }
+
+
         val bestMatch = findBestMatch(spokenText)
 
         if (bestMatch != null) {

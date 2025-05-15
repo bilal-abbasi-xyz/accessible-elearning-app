@@ -3,48 +3,69 @@ package com.bilals.elearningapp.stt
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.util.Log
+
 object STTManager {
+    private var appContext: Context? = null
     private lateinit var speechRecognizer: SpeechRecognizer
     private var isInitialized = false
+    private var isListening = false
+
     private var onResult: ((String) -> Unit)? = null
     private var onEndOfSpeech: (() -> Unit)? = null
     private var onListeningStopped: (() -> Unit)? = null
 
-    fun initialize(context: Context) {
-        if (!isInitialized) {
-            speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context).apply {
-                setRecognitionListener(object : RecognitionListener {
-                    override fun onReadyForSpeech(params: Bundle?) {
-                        Log.d("STT", "Ready for speech")
-                    }
+    // Handler for our health‐check “watchdog”
+    private val healthCheckHandler = Handler(Looper.getMainLooper())
+    private val HEALTH_CHECK_INTERVAL_MS = 30_000L
 
-                    override fun onBeginningOfSpeech() {
-                        Log.d("STT", "Speech started")
-                    }
+    private val healthCheckRunnable = object : Runnable {
+        override fun run() {
+            // Only restart if initialized but not actively listening
+            if (isInitialized && !isListening) {
+                Log.d("STT", "Health check: restarting recognizer")
+                restartRecognizer()
+            }
+            healthCheckHandler.postDelayed(this, HEALTH_CHECK_INTERVAL_MS)
+        }
+    }
+
+    fun initialize(context: Context) {
+        // Save application context for later
+        appContext = context.applicationContext
+
+        if (!isInitialized) {
+            speechRecognizer = SpeechRecognizer.createSpeechRecognizer(appContext).apply {
+                setRecognitionListener(object : RecognitionListener {
+                    override fun onReadyForSpeech(params: Bundle?) { /*…*/ }
+                    override fun onBeginningOfSpeech() { /*…*/ }
 
                     override fun onRmsChanged(rmsdB: Float) {}
                     override fun onBufferReceived(buffer: ByteArray?) {}
 
                     override fun onEndOfSpeech() {
-                        Log.d("STT", "Speech ended")
+                        isListening = false
                         onEndOfSpeech?.invoke()
                         onListeningStopped?.invoke()
                     }
 
                     override fun onError(error: Int) {
-                        Log.e("STT", "Error: $error")
+                        isListening = false
                         onListeningStopped?.invoke()
                     }
 
                     override fun onResults(results: Bundle?) {
-                        results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.let {
-                            Log.d("STT", "Recognized text: ${it[0]}")
-                            onResult?.invoke(it[0])
-                        }
+                        results
+                            ?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                            ?.firstOrNull()
+                            ?.let { onResult?.invoke(it) }
+                        isListening = false
+                        onListeningStopped?.invoke()
                     }
 
                     override fun onPartialResults(partialResults: Bundle?) {}
@@ -52,7 +73,19 @@ object STTManager {
                 })
             }
             isInitialized = true
+            startHealthCheck()
         }
+    }
+
+    private fun startHealthCheck() {
+        healthCheckHandler.removeCallbacks(healthCheckRunnable)
+        healthCheckHandler.postDelayed(healthCheckRunnable, HEALTH_CHECK_INTERVAL_MS)
+    }
+
+    private fun restartRecognizer() {
+        // Tear down and re-init
+        shutdown()
+        appContext?.let { initialize(it) }
     }
 
     fun startListening(
@@ -61,28 +94,40 @@ object STTManager {
         endOfSpeechCallback: () -> Unit,
         listeningStoppedCallback: () -> Unit
     ) {
+        if (!isInitialized) initialize(context)
+
         onResult = resultCallback
         onEndOfSpeech = endOfSpeechCallback
-        onListeningStopped = listeningStoppedCallback
+        onListeningStopped = {
+            isListening = false
+            listeningStoppedCallback()
+        }
 
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
             putExtra(RecognizerIntent.EXTRA_LANGUAGE, "en-US")
             putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
             putExtra(RecognizerIntent.EXTRA_PROMPT, "Listening for command...")
         }
+
+        isListening = true
         speechRecognizer.startListening(intent)
     }
 
     fun stopListening() {
-        if (isInitialized) {
+        if (isInitialized && isListening) {
+            isListening = false
             speechRecognizer.stopListening()
         }
     }
 
     fun shutdown() {
+        healthCheckHandler.removeCallbacks(healthCheckRunnable)
         if (isInitialized) {
             speechRecognizer.destroy()
+            isInitialized = false
+            isListening = false
         }
     }
 }
