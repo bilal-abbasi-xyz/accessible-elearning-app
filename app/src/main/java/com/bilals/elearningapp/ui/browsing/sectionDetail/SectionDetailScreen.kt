@@ -65,15 +65,17 @@ fun SectionDetailScreen(
     val quizzes by viewModel.quizzes.collectAsState()
 
 
-    val totalVideoUrls = listOf(
-        "https://archive.org/download/how-to-calculate-faster-than-a-calculator-mental-math-1/How%20to%20Calculate%20Faster%20than%20a%20Calculator%20-%20Mental%20Math%20%231.mp4",
-        "https://ia600801.us.archive.org/35/items/neural-networks-explained-in-5-minutes/Neural%20Networks%20Explained%20in%205%20minutes.mp4",
-        "https://ia800408.us.archive.org/12/items/what-is-cyber-security-how-it-works-cyber-security-in-7-minutes-cyber-security-simplilearn/Computer%20Science%20Basics_%20Should%20I%20Learn%20to%20Code_.mp4",
-        "https://ia600408.us.archive.org/12/items/what-is-cyber-security-how-it-works-cyber-security-in-7-minutes-cyber-security-simplilearn/What%20Is%20AI_%20_%20Artificial%20Intelligence%20_%20What%20is%20Artificial%20Intelligence_%20_%20AI%20In%205%20Mins%20_Simplilearn.mp4",
-        "https://ia800408.us.archive.org/12/items/what-is-cyber-security-how-it-works-cyber-security-in-7-minutes-cyber-security-simplilearn/What%20Is%20Cyber%20Security%20_%20How%20It%20Works_%20_%20Cyber%20Security%20In%207%20Minutes%20_%20Cyber%20Security%20_%20Simplilearn.mp4"
+    // 1. Hardcoded URL-name pairs
+    val allVideos = listOf(
+        "https://archive.org/download/how-to-calculate-faster-than-a-calculator-mental-math-1/How%20to%20Calculate%20Faster%20than%20a%20Calculator%20-%20Mental%20Math%20%231.mp4" to "Mental Math Tricks",
+        "https://ia600801.us.archive.org/35/items/neural-networks-explained-in-5-minutes/Neural%20Networks%20Explained%20in%205%20minutes.mp4" to "Neural Networks in 5 Minutes",
+        "https://ia800408.us.archive.org/12/items/what-is-cyber-security-how-it-works-cyber-security-in-7-minutes-cyber-security-simplilearn/Computer%20Science%20Basics_%20Should%20I%20Learn%20to%20Code_.mp4" to "Learn to Code",
+        "https://ia600408.us.archive.org/12/items/what-is-cyber-security-how-it-works-cyber-security-in-7-minutes-cyber-security-simplilearn/What%20Is%20AI_%20_%20Artificial%20Intelligence%20_%20What%20is%20Artificial%20Intelligence_%20_%20AI%20In%205%20Mins%20_Simplilearn.mp4" to "What Is A.I?",
+        "https://ia800408.us.archive.org/12/items/what-is-cyber-security-how-it-works-cyber-security-in-7-minutes-cyber-security-simplilearn/What%20Is%20Cyber%20Security%20_%20How%20It%20Works_%20_%20Cyber%20Security%20In%207%20Minutes%20_%20Cyber%20Security%20_%20Simplilearn.mp4" to "Cyber Security in 7 Minutes"
     )
-    val videoUrls = totalVideoUrls.shuffled().take(2)
 
+//// 2. Shuffle and pick any 2
+//    val selectedVideos = allVideos.shuffled().take(2)
 
     Box(
         modifier = Modifier
@@ -116,21 +118,16 @@ fun SectionDetailScreen(
 
             // 3) Videos Section (new)
             SectionItems(
-                items = videoUrls,
+                items = allVideos,
                 sectionName = "Videos",
-                onItemClick = { url ->
+                onItemClick = { (url, _) ->
                     navController.navigate(
                         ScreenRoutes.VideoScreen.createRoute(url)
                     )
                 },
-                itemName = { url ->
-                    val rawSection = url.substringAfter("download/").substringBefore("/")
-                    rawSection
-                        .split("-")
-                        .joinToString(" ") { it.replaceFirstChar { char -> char.uppercaseChar() } }
-                }
-
+                itemName = { (_, name) -> name }
             )
+
         }
 
 //        Box(modifier = Modifier.align(Alignment.BottomCenter)) {
