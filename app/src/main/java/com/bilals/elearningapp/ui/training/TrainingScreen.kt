@@ -2,6 +2,7 @@ package com.bilals.elearningapp.ui.training
 
 import android.widget.TextView
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,6 +41,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
@@ -48,6 +54,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import com.bilals.elearningapp.tts.SpeechService
+import com.bilals.elearningapp.ui.contentCreation.browsing.quiz.AnswerOption
 import com.bilals.elearningapp.ui.contentCreation.createLecture.ToolBtn
 import com.bilals.elearningapp.ui.contentCreation.createLecture.WordByWordEditor
 import com.bilals.elearningapp.ui.contentCreation.createLecture.toggleBoldSelection
@@ -72,9 +79,9 @@ fun TrainingScreen(navController: NavController) {
         mutableStateOf(
             TextFieldValue(
                 // step 4 prefill:
-                "Heading\n" +
-                        "Bold text\n" +
-                        "List item 1\n" +
+                "Heading\n\n" +
+                        "Bold\n\n" +
+                        "List item 1\n\n" +
                         "List item 2"
             )
         )
@@ -135,13 +142,20 @@ fun TrainingScreen(navController: NavController) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     (1..5).forEach { i ->
                         AppCard(
-                            onClick = {
-                                if (i == 3) trainingStep = 2
-                                else SpeechService.announce(context, "Wrong button, try again")
-                            },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(64.dp)
+                                // 1. make the whole card clickable
+                                .clickable {
+                                    if (i == 3) trainingStep = 2
+                                    else SpeechService.announce(context, "Wrong button, try again")
+                                }
+                                // 2. expose as a single button node and merge all inner semantics
+                                .semantics {
+                                    role = Role.Button
+                                    contentDescription = "Button $i"
+//                                    mergeDescendants()
+                                }
                         ) {
                             Box(
                                 Modifier.fillMaxSize(),
@@ -150,6 +164,62 @@ fun TrainingScreen(navController: NavController) {
                                 Text(
                                     "Button $i",
                                     style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp)
+                                    // no need for additional semantics on the Text
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+// inside your when(trainingStep) { … } block:
+            // 2: quiz
+            2 -> {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    // question prompt
+                    Text(
+                        "What is 2 + 2?",
+                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clearAndSetSemantics { contentDescription = "What is 2 plus 2?" }
+                            .padding(horizontal = 16.dp)
+                    )
+
+                    // use your existing AnswerOption composable for each choice
+                    listOf(2, 3, 4, 5).forEach { option ->
+                        AnswerOption(
+                            text = option.toString(),
+                            isSelected = (selectedAnswer == option),
+                            onClick = {
+                                selectedAnswer = option
+                                SpeechService.announce(context, "Answer $option selected. Click Next button")
+                            }
+                        )
+                    }
+
+                    Spacer(Modifier.height(16.dp))
+
+                    // Next button as full-width AppCard too
+                    if (selectedAnswer != null) {
+                        AppCard(
+                            onClick = {
+                                if (selectedAnswer == 4) trainingStep = 3
+                                else SpeechService.announce(context, "Wrong answer, try again")
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(64.dp)
+                                .padding(horizontal = 16.dp)
+                                .clearAndSetSemantics {
+                                    role = Role.Button
+                                    contentDescription = "Next"
+                                }
+                        ) {
+                            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                Text(
+                                    "Next",
+                                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
+                                    color = Color.White
                                 )
                             }
                         }
@@ -157,44 +227,12 @@ fun TrainingScreen(navController: NavController) {
                 }
             }
 
-            // 2: quiz
-            2 -> {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text(
-                        "What is 2 + 2?",
-                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp)
-                    )
-                    listOf(2, 3, 4, 5).forEach { option ->
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 4.dp)
-                        ) {
-                            RadioButton(
-                                selected = selectedAnswer == option,
-                                onClick = { selectedAnswer = option }
-                            )
-                            Spacer(Modifier.width(8.dp))
-                            Text(option.toString(), fontSize = 18.sp)
-                        }
-                    }
-                    Spacer(Modifier.height(16.dp))
-                    Button(onClick = {
-                        if (selectedAnswer == 4) trainingStep = 3
-                        else SpeechService.announce(context, "Wrong answer, try again")
-                    }) {
-                        Text("Next")
-                    }
-                }
-            }
 
             // 3: text input hello
             3 -> {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text(
-                        "Type something:",
-                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp)
+                        "Type hello and select the 'Send' button:",                         style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp)
                     )
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -289,7 +327,7 @@ fun TrainingScreen(navController: NavController) {
                             AppCard(
                                 onClick = {
                                     // Validate all four lines:
-                                    val lines = textState.text.split("\n")
+                                    val lines = textState.text.split("\n\n")
                                     when {
                                         !lines.getOrNull(0).orEmpty().startsWith("# ") ->
                                             SpeechService.announce(

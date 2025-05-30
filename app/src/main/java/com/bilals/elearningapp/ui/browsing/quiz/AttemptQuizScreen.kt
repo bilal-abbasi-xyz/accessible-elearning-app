@@ -12,9 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -25,6 +23,7 @@ import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,7 +33,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -42,9 +44,9 @@ import com.bilals.elearningapp.data.local.ElearningDatabase
 import com.bilals.elearningapp.data.repository.AnswerRepository
 import com.bilals.elearningapp.data.repository.QuestionRepository
 import com.bilals.elearningapp.data.repository.QuizScoreRepository
+import com.bilals.elearningapp.tts.SpeechService
 import com.bilals.elearningapp.ui.contentCreation.browsing.categoryList.gradientBackground
 import com.bilals.elearningapp.ui.theme.AppTypography
-import com.bilals.elearningapp.ui.uiComponents.AppBar
 import com.bilals.elearningapp.ui.uiComponents.AppCard
 import com.bilals.elearningapp.ui.uiComponents.HorizontalDividerWithDots
 
@@ -78,75 +80,86 @@ fun AttemptQuizScreen(navController: NavController, quizId: String, quizName: St
     val selectedAnswerMap by viewModel.selectedAnswers.collectAsState()
 
     val currentQuestion = questions.getOrNull(currentIndex)
-    val selectedAnswerId by viewModel.selectedAnswerId.collectAsState()
+//    val selectedAnswerId by viewModel.selectedAnswerId.collectAsState()
+    // ✅ This LaunchedEffect runs only once at initial composition
+    LaunchedEffect(Unit) {
+        SpeechService.announce(context, "$quizName Quiz is shown")
+    }
+    // 1 & 2. Announce question on initial load and whenever it changes
+    LaunchedEffect(currentQuestion?.id) {
+        currentQuestion?.let { q ->
+            // you can prepend “Question N:” if you like
+            SpeechService.announce(
+                context,
+                "Question ${currentIndex + 1}. ${q.text}"
+            )
+        }
+    }
 
     val answers by viewModel.answers.collectAsState()
 
     // Get answers for the current question
     val currentAnswers = answers[currentQuestion?.id] ?: emptyList()
-    AppBar(title = quizName) { navController.popBackStack() }
 
     var showResult by remember { mutableStateOf(false) }
-    if (currentQuestion != null && currentAnswers.isNotEmpty()) {
-//    if (true) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(gradientBackground())
-        ) {
+    // Once the dialog is shown, announce the score exactly one time
+    if (showResult) {
+        LaunchedEffect(Unit) {
+            SpeechService.announce(
+                context,
+                "Quiz submitted! You scored ${viewModel.calculateScore()} points"
+            )
+        }
+    }
+
+    Box(
+        Modifier
+            .fillMaxSize()
+            .background(gradientBackground())
+    ) {
+        if (currentQuestion == null || currentAnswers.isEmpty()) {
+            // loading…
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        } else {
             Column(
-                modifier = Modifier
+                Modifier
                     .fillMaxSize()
-                    .padding(bottom = 80.dp), // Adjust the bottom padding to leave space for buttons
+                    .padding(bottom = 80.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                // Question header…
+                Text(
+                    text = "${currentIndex + 1}. ${currentQuestion.text.uppercase()}",
+                    style = AppTypography.titleMedium,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                )
+                Spacer(Modifier.height(15.dp))
+                HorizontalDividerWithDots()
+                Spacer(Modifier.height(15.dp))
 
-                currentQuestion?.let { question ->
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 30.dp, start = 16.dp, end = 16.dp)
-                            .verticalScroll(rememberScrollState()),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = String.format(
-                                "%02d. %s",
-                                currentIndex + 1,
-                                question.text.uppercase()
-                            ),
-                            style = AppTypography.titleMedium,
-                            color = Color.Black,
-                            modifier = Modifier.padding(horizontal = 16.dp)
-                        )
-                        Spacer(modifier = Modifier.height(15.dp))
-                        HorizontalDividerWithDots()
-                        Spacer(modifier = Modifier.height(15.dp))
-                        // Display the answers for the current question
-                        currentAnswers.forEach { answer ->
-                            AnswerOption(
-                                text = answer.text,
-                                isSelected = selectedAnswerMap[currentQuestion?.id] == answer.id,
-                                onClick = {
-                                    viewModel.selectAnswer(
-                                        currentQuestion!!.id,
-                                        answer.id
-                                    )
-                                }
-                            )
+                // Answer options
+                currentAnswers.forEach { answer ->
+                    AnswerOption(
+                        text = answer.text,
+                        isSelected = (selectedAnswerMap[currentQuestion.id] == answer.id),
+                        onClick = {
+                            viewModel.selectAnswer(currentQuestion.id, answer.id)
+                            // 1. announce once you’ve selected an answer
+                            SpeechService.announce(context, "Answer selected, click next button")
                         }
-
-                        Spacer(modifier = Modifier.height(15.dp))
-                        HorizontalDividerWithDots()
-                    }
+                    )
                 }
-
-
             }
+
+            // Prev / Next / Submit row
             Row(
-                modifier = Modifier
+                Modifier
                     .fillMaxWidth()
-                    .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
+                    .padding(16.dp)
                     .align(Alignment.BottomCenter),
                 horizontalArrangement = if (currentIndex > 0) Arrangement.SpaceBetween else Arrangement.End
             ) {
@@ -155,58 +168,47 @@ fun AttemptQuizScreen(navController: NavController, quizId: String, quizName: St
                         onClick = { viewModel.previousQuestion() },
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(containerColor = Color.Black),
-                        shape = RoundedCornerShape(14.dp) // Set the curvature here
+                        shape = RoundedCornerShape(14.dp)
                     ) {
-                        Text(
-                            "Previous",
-                            color = Color.White,
-                            style = MaterialTheme.typography.bodyMedium // Set font to titleMedium
-                        )
+                        Text("Previous", color = Color.White)
                     }
                 }
 
-                Spacer(modifier = Modifier.width(16.dp)) // Increase the horizontal distance between buttons
+                Spacer(Modifier.width(16.dp))
 
-                Button(
-                    onClick = {
-                        if (currentIndex == questions.lastIndex) {
-                            viewModel.submitQuiz()
-                            showResult = true
-                        } else {
-                            viewModel.nextQuestion()
-                        }
-                    },
-                    modifier = Modifier.weight(1f), // Both buttons take equal width
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (currentIndex == questions.lastIndex) Color.Green else Color.Black
-                    ),
-                    shape = RoundedCornerShape(14.dp) // Set the curvature here
-                ) {
-                    Text(
-                        text = if (currentIndex == questions.lastIndex) "Submit" else "Next",
-                        color = Color.White,
-                        style = MaterialTheme.typography.bodyMedium // Set font to titleMedium
-                    )
+                // 2 & 3. Only show Next/Submit if an answer is selected
+                if (selectedAnswerMap[currentQuestion.id] != null) {
+                    val isLast = currentIndex == questions.lastIndex
+                    Button(
+                        onClick = {
+                            if (isLast) {
+                                viewModel.submitQuiz()
+                                showResult = true
+                            } else {
+                                viewModel.nextQuestion()
+                            }
+                        },
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (isLast) Color.Green else Color.Black
+                        ),
+                        shape = RoundedCornerShape(14.dp)
+                    ) {
+                        Text(if (isLast) "Submit" else "Next", color = Color.White)
+                    }
                 }
             }
 
-            Spacer(modifier = Modifier.height(30.dp))
-
+            // 4 & 5. Result dialog
             if (showResult) {
                 QuizResultDialog(
                     score = viewModel.calculateScore(),
-                    totalQuestions = questions.size,
-                    onDismiss = {
-                        showResult = false
-                        navController.popBackStack()
-                    }
-                )
+                    totalQuestions = questions.size
+                ) {
+                    showResult = false
+                    navController.popBackStack()
+                }
             }
-        }
-    } else {
-        // Show a loading indicator while data is loading
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
         }
     }
 }
@@ -242,31 +244,74 @@ fun AnswerOption(text: String, isSelected: Boolean, onClick: () -> Unit) {
 }
 
 @Composable
-fun QuizResultDialog(score: Int, totalQuestions: Int, onDismiss: () -> Unit) {
-    val randomScore =
-        (1..totalQuestions).random() // Assign a random score between 1 and total number of questions
+fun QuizResultDialog(
+    score: Int,
+    totalQuestions: Int,
+    onDismiss: () -> Unit
+) {
+    val context = LocalContext.current
+    val displayScore = if (score == 0) (1..totalQuestions).random() else score
+
+    // Announce once when dialog appears
+    LaunchedEffect(Unit) {
+        SpeechService.announce(context, "Quiz Completed! You scored $displayScore points:")
+    }
+
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Quiz Completed", style = MaterialTheme.typography.headlineMedium) },
-        text = {
-            val displayScore = if (score == 0) randomScore else score
-            Text(
-                "You scored $displayScore points!",
-                style = MaterialTheme.typography.bodyMedium
-            )
+
+        title = {
+            // full-width, single semantics node
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .clearAndSetSemantics {
+                        contentDescription = "Quiz Completed"
+                    }
+                    .padding(vertical = 8.dp) // match your spacing
+            ) {
+                Text(
+                    text = "Quiz Completed",
+                    style = MaterialTheme.typography.headlineMedium,
+                    modifier = Modifier.align(Alignment.CenterStart)
+                )
+            }
         },
+
+        text = {
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .clearAndSetSemantics {
+                        contentDescription = "You scored $displayScore points!"
+                    }
+                    .padding(vertical = 8.dp)
+            ) {
+                Text(
+                    text = "You scored $displayScore points!",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.align(Alignment.CenterStart)
+                )
+            }
+        },
+
         confirmButton = {
             TextButton(
                 onClick = onDismiss,
                 modifier = Modifier
-                    .fillMaxWidth() // Make the clickable area span the full width
-                    .semantics { contentDescription = "OK Button" } // Adds a description for screen readers
+                    .fillMaxWidth()
+                    .clearAndSetSemantics {
+                        role = Role.Button
+                        contentDescription = "OK"
+                    }
+                    .padding(vertical = 8.dp)
             ) {
-                Text("OK", style = MaterialTheme.typography.bodyMedium)
+                Text(
+                    "OK",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
-
         }
     )
 }
-
-

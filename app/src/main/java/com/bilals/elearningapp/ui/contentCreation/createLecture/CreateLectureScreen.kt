@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextRange
@@ -330,6 +331,15 @@ fun WordByWordEditor(
                         modifier = Modifier
                             .semantics { contentDescription = w }
                             .focusable()
+                            .onFocusChanged { state ->
+                                if (state.isFocused) {
+                                    SpeechService.announce(context, "$w selected")
+                                }
+                            }
+                            .clearAndSetSemantics {
+                                // so the entire word is one node
+                                contentDescription = w
+                            }
                             .clickable {
                                 onValueChange(
                                     TextFieldValue(
@@ -337,7 +347,7 @@ fun WordByWordEditor(
                                         TextRange(start, start + w.length)
                                     )
                                 )
-                                SpeechService.announce(context, w)
+                                SpeechService.announce(context, "$w selected")
                             }
                     )
                     offset += w.length

@@ -39,16 +39,21 @@ class CourseForumViewModel(
     }
 
 
-    // ✅ Send message (Text)
-    fun sendMessage(courseId: String, content: String, senderId: String) {
+    fun sendMessage(
+        courseId: String,
+        content: String,
+        audioPath: String? = null,
+        senderId: String
+    ) {
         viewModelScope.launch {
             val message = ChatMessage(
-                id = System.currentTimeMillis().toString(), // Unique ID
-                courseId = courseId,
-                senderId = senderId,
-                content = content,
+                id        = System.currentTimeMillis().toString(),
+                courseId  = courseId,
+                senderId  = senderId,
+                content   = content,
+                audioUrl  = audioPath,            // null for text, non-null for audio
                 timestamp = System.currentTimeMillis(),
-                isAudio = false
+                isAudio   = (audioPath != null)
             )
             repository.sendMessage(courseId, message)
         }

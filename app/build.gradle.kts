@@ -77,6 +77,8 @@ dependencies {
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.core)
     implementation(libs.identity.doctypes.jvm)
+//    implementation(libs.mediation.test.suite)
+    implementation(libs.androidx.media3.ui)
 
 
     //    implementation("com.google.dagger:hilt-android:2.50")
@@ -123,4 +125,7 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    implementation(libs.androidx.media3.ui.v110)
+    implementation(libs.androidx.media3.exoplayer.v110)
+
 }

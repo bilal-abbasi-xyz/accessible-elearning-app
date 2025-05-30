@@ -11,12 +11,18 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -26,12 +32,14 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.bilals.elearningapp.data.model.RoleType
 import com.bilals.elearningapp.data.repository.AuthRepository
@@ -46,7 +54,7 @@ import com.bilals.elearningapp.ui.auth.signup.SignUpScreen
 import com.bilals.elearningapp.ui.auth.signup.SignUpViewModel
 import com.bilals.elearningapp.ui.browsing.publicForum.PublicForumScreen
 import com.bilals.elearningapp.ui.browsing.report.ReportScreen
-import com.bilals.elearningapp.ui.training.TrainingScreen
+import com.bilals.elearningapp.ui.browsing.video.VideoScreen
 import com.bilals.elearningapp.ui.contentCreation.browsing.categoryList.CategoryListScreen
 import com.bilals.elearningapp.ui.contentCreation.browsing.courseDetail.CourseDetailScreen
 import com.bilals.elearningapp.ui.contentCreation.browsing.courseForum.CourseForumScreen
@@ -54,18 +62,19 @@ import com.bilals.elearningapp.ui.contentCreation.browsing.courseList.CourseList
 import com.bilals.elearningapp.ui.contentCreation.browsing.home.HomeScreen
 import com.bilals.elearningapp.ui.contentCreation.browsing.lecture.ViewLectureScreen
 import com.bilals.elearningapp.ui.contentCreation.browsing.quiz.AttemptQuizScreen
-import com.bilals.elearningapp.ui.contentCreation.browsing.resource.ViewResourceScreen
 import com.bilals.elearningapp.ui.contentCreation.browsing.sectionDetail.SectionDetailScreen
 import com.bilals.elearningapp.ui.contentCreation.createLecture.CreateLectureScreen
 import com.bilals.elearningapp.ui.contentCreation.createQuiz.CreateQuizScreen
 import com.bilals.elearningapp.ui.contentCreation.sectionContentCreation.CreateSectionContentScreen
 import com.bilals.elearningapp.ui.contentCreation.unpublishedCourses.UnpublishedCourseListScreen
 import com.bilals.elearningapp.ui.instructor.InstructorHomeScreen
-import com.bilals.elearningapp.ui.settings.profile.ProfileSettingsScreen
 import com.bilals.elearningapp.ui.settings.home.SettingsScreen
+import com.bilals.elearningapp.ui.settings.profile.ProfileSettingsScreen
 import com.bilals.elearningapp.ui.settings.ui.UISettingsScreen
 import com.bilals.elearningapp.ui.settings.ui.UISettingsViewModel
 import com.bilals.elearningapp.ui.theme.AppTheme
+import com.bilals.elearningapp.ui.training.TrainingScreen
+import com.bilals.elearningapp.ui.uiComponents.BottomNavBar
 import com.bilals.elearningapp.ui.welcomeScreen.WelcomeScreen
 import com.google.firebase.auth.FirebaseAuth
 import kotlin.math.absoluteValue
@@ -148,15 +157,48 @@ fun AppContent(context: Context, uiSettingsViewModel: UISettingsViewModel) {
     val recognizedText = remember { mutableStateOf("") }
     val speechInputHandler =
         remember { SpeechInputHandler(context, navController, recognizedText, commandProcessor) }
-    HandleSwipeGestures(speechInputHandler)
+
     RecognizedTextDisplay(recognizedText, context)
     SessionManager.saveActiveRole(RoleType.STUDENT, context)
-    AppNavHost(
-        navController       = navController,
-        appContainer        = appContainer,
-        speechInputHandler  = speechInputHandler,
-        uiViewModel = uiSettingsViewModel
-    )}
+
+    // Observe the current back-stack entry
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
+    // Define which routes should _not_ have the bar
+    val noBarRoutes = setOf(
+        ScreenRoutes.AttemptQuiz.route
+    )
+
+    Scaffold(
+        bottomBar = {
+            if (currentRoute !in noBarRoutes) {
+                BottomNavBar(navController, speechInputHandler)
+            }
+        },
+        // you can also control padding around the bar automatically:
+        contentWindowInsets = WindowInsets.safeDrawing    // or safeContent
+    ) { innerPadding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(
+                    start = innerPadding.calculateStartPadding(LayoutDirection.Ltr),
+                    top = innerPadding.calculateTopPadding(),
+                    end = innerPadding.calculateEndPadding(LayoutDirection.Ltr),
+                )   // <-- include bottom padding again
+        ) {
+            AppNavHost(
+                navController = navController,
+                appContainer = appContainer,
+                speechInputHandler = speechInputHandler,
+                uiViewModel = uiSettingsViewModel
+            )
+            // Optional overlay (e.g. RecognizedTextDisplay) can sit here too
+            RecognizedTextDisplay(recognizedText, context)
+        }
+    }
+}
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -171,7 +213,9 @@ fun HandleSwipeGestures(speechInputHandler: SpeechInputHandler) {
                 awaitPointerEventScope {
                     while (true) {
                         val event = awaitPointerEvent(PointerEventPass.Final)
-                        val dragAmount = event.changes.firstOrNull()?.positionChange()?.x ?: 0f
+                        val dragAmount = event.changes
+                            .firstOrNull()
+                            ?.positionChange()?.x ?: 0f
                         if (dragAmount.absoluteValue > 50 && !speechInputHandler.isListening) {
                             speechInputHandler.startListening()
                         }
@@ -191,7 +235,7 @@ fun RecognizedTextDisplay(recognizedText: MutableState<String>, context: Context
     LaunchedEffect(recognizedText.value) {
         if (recognizedText.value.isNotEmpty()) {
             val briefText = recognizedText.value.split(" ").take(3).joinToString(" ")
-            Toast.makeText(context, "You said: $briefText", Toast.LENGTH_SHORT).show()
+//            Toast.makeText(context, "You said: $briefText", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -284,12 +328,11 @@ fun AppNavHost(
             )
         }
 
-        composable(ScreenRoutes.ViewResource.route) { backStackEntry ->
-            val resourceId = backStackEntry.arguments?.getString("resourceId") ?: ""
-            val resourceName = backStackEntry.arguments?.getString("resourceName") ?: ""
-            ViewResourceScreen(
-                navController = navController, resourceId = resourceId, resourceName = resourceName
-            )
+
+
+        composable(ScreenRoutes.VideoScreen.route) {
+            val videoUrl = it.arguments?.getString("videoUrl") ?: ""
+            VideoScreen(navController = navController, videoUrl = videoUrl)
         }
 
         composable(ScreenRoutes.Settings.route) {

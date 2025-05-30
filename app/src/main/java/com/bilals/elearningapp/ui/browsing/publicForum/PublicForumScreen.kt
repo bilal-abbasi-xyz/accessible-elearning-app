@@ -1,27 +1,13 @@
 package com.bilals.elearningapp.ui.browsing.publicForum
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Text
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-
+import android.Manifest
+import android.media.MediaRecorder
 import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -42,6 +28,8 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.TextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -53,11 +41,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.isTraversalGroup
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
@@ -65,20 +58,20 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.bilals.elearningapp.data.local.ElearningDatabase
-import com.bilals.elearningapp.data.model.ChatMessage
-import com.bilals.elearningapp.data.repository.ChatRepository
-import com.bilals.elearningapp.di.AppContainer
-import com.bilals.elearningapp.navigation.ScreenRoutes
 import com.bilals.elearningapp.SessionManager
+import com.bilals.elearningapp.data.local.ElearningDatabase
 import com.bilals.elearningapp.data.model.PublicChatMessage
 import com.bilals.elearningapp.data.repository.PublicChatRepository
+import com.bilals.elearningapp.di.AppContainer
+import com.bilals.elearningapp.navigation.ScreenRoutes
+import com.bilals.elearningapp.tts.SpeechService
 import com.bilals.elearningapp.ui.contentCreation.browsing.categoryList.gradientBackground
-import com.bilals.elearningapp.ui.contentCreation.browsing.courseForum.ChatBubble
+import com.bilals.elearningapp.ui.contentCreation.browsing.courseForum.AudioBubble
 import com.bilals.elearningapp.ui.theme.AppTypography
 import com.bilals.elearningapp.ui.uiComponents.AppBar
-import com.bilals.elearningapp.ui.uiComponents.BottomNavBar
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -98,6 +91,20 @@ fun PublicForumScreen(
     val coroutineScope = rememberCoroutineScope()
     var messageText by remember { mutableStateOf(TextFieldValue("")) }
     val userId = SessionManager.getUserIdFromPreferences(context)
+
+    // Request mic-permission
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted -> /* you can show a toast if denied */ }
+
+    LaunchedEffect(Unit) {
+        permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+    }
+
+// Recording state
+    var isRecording by remember { mutableStateOf(false) }
+    var recorder: MediaRecorder? by remember { mutableStateOf(null) }
+    var audioFilePath by remember { mutableStateOf<String?>(null) }
 
     Box(
         modifier = Modifier
@@ -138,16 +145,24 @@ fun PublicForumScreen(
                         }
                     }
 
-                    // Here we assume you have a PublicChatBubble composable to display each message.
-                    PublicChatBubble(
-                        message = message,
-                        isSentByUser = message.senderId == userId,
-                        senderName = senderName ?: "Unknown",
-                        onItemClick = {
-                            // Handle the click event here, such as navigating to a message detail screen or showing actions
-                            Log.d("ChatBubble", "Message clicked: ${message.content}")
-                        }
-                    )
+                    if (message.audioUrl != null) {
+                        AudioBubble(
+                            audioUrl = message.audioUrl,
+                            timestamp = message.timestamp,
+                            isSentByUser = message.senderId == userId,
+                            senderName = senderName ?: "Unknown"
+                        )
+                    } else {
+                        PublicChatBubble(
+                            message = message,
+                            isSentByUser = message.senderId == userId,
+                            senderName = senderName ?: "Unknown",
+                            onItemClick = {
+                                // Handle the click event here, such as navigating to a message detail screen or showing actions
+                                Log.d("ChatBubble", "Message clicked: ${message.content}")
+                            }
+                        )
+                    }
                 }
             }
 
@@ -177,10 +192,55 @@ fun PublicForumScreen(
                         placeholder = { Text("Type a message...") }
                     )
                     Spacer(modifier = Modifier.width(8.dp))
+
+                    // 2) Mic toggle
+                    IconButton(onClick = {
+                        if (!isRecording) {
+                            audioFilePath = context.externalCacheDir
+                                ?.absolutePath + "/record_${System.currentTimeMillis()}.3gp"
+                            recorder = MediaRecorder().apply {
+                                setAudioSource(MediaRecorder.AudioSource.MIC)
+                                setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
+                                setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
+                                setOutputFile(audioFilePath)
+                                prepare(); start()
+                            }
+                            isRecording = true
+                            SpeechService.announce(context, "Recording started.")
+                        } else {
+                            coroutineScope.launch(Dispatchers.IO) {
+                                recorder?.run { stop(); release() }
+                                withContext(Dispatchers.Main) {
+                                    isRecording = false
+                                    SpeechService.announce(
+                                        context,
+                                        "Recording stopped, sending."
+                                    )
+                                    audioFilePath?.let { path ->
+                                        viewModel.sendMessage("", path, userId)
+                                        audioFilePath = null
+                                    }
+                                }
+                            }
+                        }
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Mic,
+                            contentDescription = if (isRecording) "Stop recording" else "Start recording",
+                            tint = if (isRecording) Color.Red else Color.Black,
+                            modifier = Modifier.semantics {
+                                stateDescription =
+                                    if (isRecording) "Recording in progress" else "Tap to start recording"
+                            }
+                        )
+                    }
+
+                    Spacer(Modifier.width(8.dp))
+
                     IconButton(onClick = {
                         coroutineScope.launch {
                             if (messageText.text.isNotBlank()) {
-                                viewModel.sendMessage(messageText.text.trim(), userId)
+                                viewModel.sendMessage(messageText.text.trim(), "", userId)
                                 messageText = TextFieldValue("")
                             }
                         }
@@ -204,13 +264,11 @@ fun PublicForumScreen(
                 )
             }
         }
-        Box(modifier = Modifier.align(Alignment.BottomCenter)) {
-            BottomNavBar(navController = navController)
-        }
+//        Box(modifier = Modifier.align(Alignment.BottomCenter)) {
+//            BottomNavBar(navController = navController)
+//        }
     }
 }
-
-
 @Composable
 fun PublicChatBubble(
     message: PublicChatMessage,
@@ -220,40 +278,45 @@ fun PublicChatBubble(
 ) {
     val bubbleColor = if (isSentByUser) Color(0xFF007AFF) else Color.Green
     val textColor = if (isSentByUser) Color.White else Color.Black
-    val alignment = if (isSentByUser) Alignment.End else Alignment.Start
-
-    val dateFormatter = SimpleDateFormat("hh:mm a", Locale.getDefault())
-    val formattedTimestamp = dateFormatter.format(Date(message.timestamp))
+    val formattedTimestamp = SimpleDateFormat("hh:mm a", Locale.getDefault())
+        .format(Date(message.timestamp))
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(4.dp)
     ) {
-        // Sender Name (Aligned correctly based on user or other person)
+        // 1) Sender Name row
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 4.dp, horizontal = 0.dp)
-                .semantics { this.isTraversalGroup = true },
+                .clearAndSetSemantics {
+                    contentDescription = if (isSentByUser) "You" else senderName
+                }
+                .focusable(true),
             horizontalArrangement = if (isSentByUser) Arrangement.End else Arrangement.Start
         ) {
-            Box(
-            ) {
-                Text(
-                    text = if (isSentByUser) "You" else senderName,
-                    style = MaterialTheme.typography.body2.copy(fontWeight = FontWeight.Bold),
-                    color = Color.Gray
-                )
-            }
+            Text(
+                text = if (isSentByUser) "You" else senderName,
+                style = MaterialTheme.typography.body2.copy(fontWeight = FontWeight.Bold),
+                color = Color.Gray
+            )
         }
 
-        // Chat Bubble (Full-width Clickable)
+        // 2) Public chat bubble row
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 4.dp, horizontal = 0.dp)
-                .semantics { this.isTraversalGroup = true },
+                .padding(vertical = 4.dp)
+                .clearAndSetSemantics {
+//                    role = Role.Button
+                    contentDescription = message.content
+//                    onClick {
+//                        onItemClick(message.id)
+//                        true
+//                    }
+                }
+                .focusable(true),
             horizontalArrangement = if (isSentByUser) Arrangement.End else Arrangement.Start
         ) {
             Box(
@@ -265,30 +328,27 @@ fun PublicChatBubble(
                     text = message.content,
                     color = textColor,
                     fontSize = 16.sp,
-                    style = MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Normal),
                     maxLines = 5,
                     overflow = TextOverflow.Ellipsis
                 )
             }
         }
 
-        // Timestamp (Aligned correctly based on user or other person)
+        // 3) Timestamp row
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 4.dp, horizontal = 0.dp)
-                .semantics { this.isTraversalGroup = true },
+                .clearAndSetSemantics {
+                    contentDescription = formattedTimestamp
+                }
+                .focusable(true),
             horizontalArrangement = if (isSentByUser) Arrangement.End else Arrangement.Start
         ) {
-            Box(
-            ) {
-                Text(
-                    text = formattedTimestamp,
-                    style = MaterialTheme.typography.body2.copy(fontSize = 12.sp),
-                    color = Color.Gray
-                )
-            }
+            Text(
+                text = formattedTimestamp,
+                style = MaterialTheme.typography.body2.copy(fontSize = 12.sp),
+                color = Color.Gray
+            )
         }
     }
 }
-

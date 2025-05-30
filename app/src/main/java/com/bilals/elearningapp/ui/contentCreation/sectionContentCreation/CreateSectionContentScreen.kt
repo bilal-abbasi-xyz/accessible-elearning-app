@@ -132,9 +132,9 @@ fun CreateSectionContentScreen(
         }
 
         // Bottom Navigation Bar
-        Box(modifier = Modifier.align(Alignment.BottomCenter)) {
-            BottomNavBar(navController = navController)
-        }
+//        Box(modifier = Modifier.align(Alignment.BottomCenter)) {
+//            BottomNavBar(navController = navController)
+//        }
     }
 
     // **Popup Dialog for Quiz, Lecture, and Resource Name Input**

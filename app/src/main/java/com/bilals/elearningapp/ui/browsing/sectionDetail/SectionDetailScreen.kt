@@ -32,7 +32,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.bilals.elearningapp.data.local.ElearningDatabase
 import com.bilals.elearningapp.di.AppContainer
 import com.bilals.elearningapp.navigation.ScreenRoutes
 import com.bilals.elearningapp.ui.contentCreation.browsing.categoryList.gradientBackground
@@ -49,16 +48,8 @@ fun SectionDetailScreen(
     appContainer: AppContainer
 ) {
     val context = LocalContext.current
-    val database = ElearningDatabase.getDatabase(context)
 
-//    val lectureDao = remember { database.lectureDao() }
-//    val lectureRepo = remember { LectureRepository(lectureDao, context) }
-//
-//    val quizDao = remember { database.quizDao() }
-//    val quizRepo = remember { QuizRepository(quizDao, context) }
-//
-//    val resourceDao = remember { database.resourceDao() }
-//    val resourceRepo = remember { ResourceRepository(resourceDao, context) }
+    // 1) remove resourceRepo and resources state entirely
 
     val viewModel =
         remember {
@@ -72,7 +63,11 @@ fun SectionDetailScreen(
 
     val lectures by viewModel.lectures.collectAsState()
     val quizzes by viewModel.quizzes.collectAsState()
-    val resources by viewModel.resources.collectAsState()
+
+    // 2) define your hard-coded video URLs here:
+    val videoUrls = listOf(
+        "https://archive.org/download/how-to-calculate-faster-than-a-calculator-mental-math-1/How%20to%20Calculate%20Faster%20than%20a%20Calculator%20-%20Mental%20Math%20%231.mp4"
+    )
 
     Box(
         modifier = Modifier
@@ -83,58 +78,58 @@ fun SectionDetailScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(bottom = 60.dp)
-                .verticalScroll(rememberScrollState()), // Enable scrolling
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // AppBar
-            AppBar(title = "$sectionName") { navController.popBackStack() }
+            AppBar(title = sectionName) { navController.popBackStack() }
 
-            // Quizzes Section
+            // Quizzes Section (unchanged)
             SectionItems(
                 items = quizzes,
                 sectionName = "Quizzes",
                 onItemClick = { quiz ->
-                    navController.navigate(ScreenRoutes.AttemptQuiz.createRoute(quiz.id, quiz.name))
+                    navController.navigate(
+                        ScreenRoutes.AttemptQuiz.createRoute(quiz.id, quiz.name)
+                    )
                 },
-                itemName = { quiz -> quiz.name }
+                itemName = { it.name }
             )
 
-            // Lectures Section
+            // Lectures Section (unchanged)
             SectionItems(
                 items = lectures,
                 sectionName = "Lectures",
                 onItemClick = { lecture ->
                     navController.navigate(
-                        ScreenRoutes.ViewLecture.createRoute(
-                            lecture.id,
-                            lecture.name
-                        )
+                        ScreenRoutes.ViewLecture.createRoute(lecture.id, lecture.name)
                     )
                 },
-                itemName = { lecture -> lecture.name }
+                itemName = { it.name }
             )
 
-            // Resources Section
+            // 3) Videos Section (new)
             SectionItems(
-                items = resources,
-                sectionName = "Resources",
-                onItemClick = { resource ->
+                items = videoUrls,
+                sectionName = "Videos",
+                onItemClick = { url ->
                     navController.navigate(
-                        ScreenRoutes.ViewResource.createRoute(
-                            resource.id,
-                            resource.name
-                        )
+                        ScreenRoutes.VideoScreen.createRoute(url)
                     )
                 },
-                itemName = { resource -> resource.name }
+                itemName = { url ->
+                    val rawSection = url.substringAfter("download/").substringBefore("/")
+                    rawSection
+                        .split("-")
+                        .joinToString(" ") { it.replaceFirstChar { char -> char.uppercaseChar() } }
+                }
+
             )
         }
 
-        // Bottom Navigation Bar
-        Box(modifier = Modifier.align(Alignment.BottomCenter)) {
-            BottomNavBar(navController = navController)
-        }
+//        Box(modifier = Modifier.align(Alignment.BottomCenter)) {
+//            BottomNavBar(navController = navController)
+//        }
     }
 }
 

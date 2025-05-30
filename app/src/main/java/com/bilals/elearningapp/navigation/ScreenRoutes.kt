@@ -1,5 +1,7 @@
 package com.bilals.elearningapp.navigation
 
+import android.net.Uri
+
 sealed class ScreenRoutes(val route: String) {
 
 
@@ -26,6 +28,10 @@ sealed class ScreenRoutes(val route: String) {
             "viewLecture/$lectureId/$lectureName"
     }
 
+    object VideoScreen : ScreenRoutes("videoScreen?videoUrl={videoUrl}") {
+        fun createRoute(videoUrl: String) =
+            "videoScreen?videoUrl=${Uri.encode(videoUrl)}"
+    }
     object AttemptQuiz : ScreenRoutes("attemptQuiz/{quizId}/{quizName}") {
         fun createRoute(quizId: String, quizName: String) = "attemptQuiz/$quizId/$quizName"
     }

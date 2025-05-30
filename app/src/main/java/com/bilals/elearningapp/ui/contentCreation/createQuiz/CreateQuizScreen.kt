@@ -219,9 +219,9 @@ fun CreateQuizScreen(
             }
         }
 
-        Box(modifier = Modifier.align(Alignment.BottomCenter)) {
-            BottomNavBar(navController = navController)
-        }
+//        Box(modifier = Modifier.align(Alignment.BottomCenter)) {
+//            BottomNavBar(navController = navController)
+//        }
     }
 
     // Popup Dialog for Adding New Question (unchanged)

@@ -19,48 +19,78 @@ import com.bilals.elearningapp.navigation.ScreenRoutes
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material3.IconButton
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import com.bilals.elearningapp.stt.SpeechInputHandler
 
 @Composable
-fun BottomNavBar(navController: NavController) {
+fun BottomNavBar(
+    navController: NavController,
+    speechInputHandler: SpeechInputHandler
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(64.dp) // Increased height to prevent cutoff
-            .background(Color(0xAA000000))
-            .windowInsetsPadding(WindowInsets.navigationBars) // Prevent overlap
+            .height(64.dp)
+            .background(Color(0xCC000000), shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
+            .windowInsetsPadding(WindowInsets.navigationBars)
     ) {
         Row(
             modifier = Modifier
-                .fillMaxSize() // Ensures full height usage
-                .padding(vertical = 4.dp), // Add padding inside Row
-            horizontalArrangement = Arrangement.SpaceEvenly,
+                .fillMaxSize()
+                .padding(horizontal = 24.dp),  // generous horizontal padding
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            listOf(
-                Pair(Icons.Filled.Home, "Home") to ScreenRoutes.Home.route,
-                Pair(Icons.Filled.Settings, "Settings") to ScreenRoutes.Settings.route
-            ).forEach { (pair, route) ->
-                val (icon, label) = pair
+            // ---- Home ----
+            IconButton(
+                onClick = { navController.navigate(ScreenRoutes.Home.route) },
+                modifier = Modifier
+                    .semantics { contentDescription = "Go to Home" }
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Home,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(28.dp)
+                )
+            }
 
-                Column(
+            // ---- Voice Command ----
+            IconButton(
+                onClick = { speechInputHandler.startListening() },
+                modifier = Modifier
+                    .semantics {
+                        contentDescription = "Use a voice command"
+                    }
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Mic,
+                    contentDescription = null,
+                    tint = Color.White,
                     modifier = Modifier
-                        .clickable { navController.navigate(route) }
-                        .padding(vertical = 4.dp), // Extra spacing to prevent cut-off
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = label,
-                        tint = Color.White,
-                        modifier = Modifier.size(28.dp)
-                    )
-                    Spacer(modifier = Modifier.height(2.dp)) // Small gap between icon and text
-                    Text(
-                        text = label,
-                        fontSize = 12.sp,
-                        color = Color.White
-                    )
-                }
+                        .size(32.dp)
+                        .background(Color(0x33FFFFFF), shape = CircleShape)
+                        .padding(6.dp)
+                )
+            }
+
+            // ---- Settings ----
+            IconButton(
+                onClick = { navController.navigate(ScreenRoutes.Settings.route) },
+                modifier = Modifier
+                    .semantics { contentDescription = "Go to Settings" }
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Settings,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(28.dp)
+                )
             }
         }
     }

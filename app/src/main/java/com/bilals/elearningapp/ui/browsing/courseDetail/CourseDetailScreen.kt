@@ -262,9 +262,9 @@ fun CourseDetailScreen(
             }
 
         }
-        Box(modifier = Modifier.align(Alignment.BottomCenter)) {
-            BottomNavBar(navController = navController)
-        }
+//        Box(modifier = Modifier.align(Alignment.BottomCenter)) {
+//            BottomNavBar(navController = navController)
+//        }
     }
 }
 

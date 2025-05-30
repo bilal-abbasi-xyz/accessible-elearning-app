@@ -98,9 +98,9 @@ fun CategoryListScreen(
                 }
             }
         }
-        Box(modifier = Modifier.align(Alignment.BottomCenter)) {
-            BottomNavBar(navController)
-        }
+//        Box(modifier = Modifier.align(Alignment.BottomCenter)) {
+//            BottomNavBar(navController)
+//        }
     }
 }
 

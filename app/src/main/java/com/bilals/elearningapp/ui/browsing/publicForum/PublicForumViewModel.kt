@@ -42,14 +42,17 @@ class PublicForumViewModel(
     }
 
     // Send a new public chat message
-    fun sendMessage(content: String, senderId: String) {
+    fun sendMessage(content: String,
+                    audioPath: String? = null,
+                    senderId: String) {
         viewModelScope.launch {
             val message = PublicChatMessage(
-                id = System.currentTimeMillis().toString(), // Unique ID generation
-                senderId = senderId,
-                content = content,
+                id        = System.currentTimeMillis().toString(),
+                senderId  = senderId,
+                content   = content,
+                audioUrl  = audioPath,            // null for text, non-null for audio
                 timestamp = System.currentTimeMillis(),
-                isAudio = false
+                isAudio   = (audioPath != null)
             )
             repository.sendMessage(message)
         }
