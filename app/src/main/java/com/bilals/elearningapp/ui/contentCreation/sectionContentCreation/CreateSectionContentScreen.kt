@@ -17,8 +17,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -143,36 +145,53 @@ fun CreateSectionContentScreen(
             onDismissRequest = { showDialog = false },
             title = { Text("Enter $itemType Name") },
             text = {
-                TextField(
-                    value = newItemName,
-                    onValueChange = { newItemName = it },
-                    label = { Text("$itemType Name") }
-                )
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        if (newItemName.isNotBlank()) {
-                            when (itemType) {
-                                "Quiz" -> viewModel.createNewQuiz(newItemName)
-                                "Lecture" -> viewModel.createNewLecture(newItemName)
-                                "Resource" -> viewModel.createNewResource(newItemName)
-                            }
-                            showDialog = false
-                            newItemName = ""
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    TextField(
+                        value = newItemName,
+                        onValueChange = { newItemName = it },
+                        label = { Text("$itemType Name") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    // Buttons in one column
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Button(
+                            onClick = {
+                                if (newItemName.isNotBlank()) {
+                                    when (itemType) {
+                                        "Quiz" -> viewModel.createNewQuiz(newItemName)
+                                        "Lecture" -> viewModel.createNewLecture(newItemName)
+                                        "Resource" -> viewModel.createNewResource(newItemName)
+                                    }
+                                    showDialog = false
+                                    newItemName = ""
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Save")
+                        }
+
+                        OutlinedButton(
+                            onClick = { showDialog = false },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Cancel")
                         }
                     }
-                ) {
-                    Text("Save")
                 }
             },
-            dismissButton = {
-                TextButton(onClick = { showDialog = false }) {
-                    Text("Cancel")
-                }
-            }
+            confirmButton = {}, // Moved to `text`
+            dismissButton = {}
         )
     }
+
 }
 
 @Composable

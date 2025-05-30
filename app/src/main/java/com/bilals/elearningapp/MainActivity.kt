@@ -167,7 +167,9 @@ fun AppContent(context: Context, uiSettingsViewModel: UISettingsViewModel) {
 
     // Define which routes should _not_ have the bar
     val noBarRoutes = setOf(
-        ScreenRoutes.AttemptQuiz.route
+        ScreenRoutes.AttemptQuiz.route,
+        ScreenRoutes.ViewLecture.route,
+        ScreenRoutes.ProfileSettings.route
     )
 
     Scaffold(

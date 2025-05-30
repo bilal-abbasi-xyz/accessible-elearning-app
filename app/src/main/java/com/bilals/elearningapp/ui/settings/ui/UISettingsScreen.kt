@@ -1,9 +1,11 @@
 package com.bilals.elearningapp.ui.settings.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -21,6 +23,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.invisibleToUser
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.bilals.elearningapp.tts.SpeechService
@@ -29,6 +38,7 @@ import com.bilals.elearningapp.ui.theme.fontNames
 import com.bilals.elearningapp.ui.theme.fontOptions
 import com.bilals.elearningapp.ui.uiComponents.AppBar
 import kotlin.math.roundToInt
+
 @Composable
 fun UISettingsScreen(
     navController: NavController,
@@ -36,7 +46,6 @@ fun UISettingsScreen(
 ) {
     val context = LocalContext.current
     val fontIndex = uiSettings.chosenFontIndex
-    var textZoom by remember { mutableFloatStateOf(1f) }
     var colorPatternIndex by remember { mutableIntStateOf(0) }
     var magnificationEnabled by remember { mutableStateOf(false) }
 
@@ -56,60 +65,81 @@ fun UISettingsScreen(
             verticalArrangement = Arrangement.spacedBy(48.dp),
             horizontalAlignment = Alignment.Start
         ) {
-            // Magnification section: text on one line, switch on the next
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Text(
-                    text = "Magnification: ${if (magnificationEnabled) "On" else "Off"}",
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Switch(
-                    checked = magnificationEnabled,
-                    onCheckedChange = {
-                        magnificationEnabled = it
-                        if (it) {
-                            SpeechService.announce(context, "Triple tap to magnify")
+            // 1) Magnification row as before…
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clearAndSetSemantics {
+                        role = Role.Switch
+                        contentDescription = "Magnification ${if (magnificationEnabled) "On" else "Off"}"
+                        onClick {
+                            magnificationEnabled = !magnificationEnabled
+                            if (magnificationEnabled) {
+                                SpeechService.announce(context, "Triple tap to magnify")
+                            }
+                            true
                         }
                     }
-                )
-            }
-
-            // Color pattern
-            Column(
-                modifier = Modifier.fillMaxWidth()
+                    .clickable {
+                        magnificationEnabled = !magnificationEnabled
+                        if (magnificationEnabled) SpeechService.announce(context, "Triple tap to magnify")
+                    }
+                    .padding(vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "Color Pattern: $colorPatternIndex",
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Slider(
-                    value = colorPatternIndex.toFloat(),
-                    onValueChange = {
-                        val index = it.roundToInt().coerceIn(0, 5)
-                        colorPatternIndex = index
-                        AppColors.setPattern(index)
-                    },
-                    valueRange = 0f..5f,
-                    steps = 4
+                Text("Magnification", style = MaterialTheme.typography.titleMedium)
+                Spacer(Modifier.weight(1f))
+                Switch(
+                    checked = magnificationEnabled,
+                    onCheckedChange = null,
+                    modifier = Modifier.semantics { invisibleToUser() }
                 )
             }
 
-            // Font chooser
-            Column {
-                Text("Choose Font", style = MaterialTheme.typography.titleMedium)
-                Slider(
-                    value = fontIndex.toFloat(),
-                    onValueChange = {
-                        val idx = it.roundToInt().coerceIn(0, fontOptions.lastIndex)
-                        uiSettings.setFontIndex(idx)
-                    },
-                    valueRange = 0f..fontOptions.lastIndex.toFloat(),
-                    steps = fontOptions.size - 2
-                )
-                Text(fontNames[fontIndex], style = MaterialTheme.typography.bodyLarge)
-            }
+            // 2) Color Pattern: hide the label, expose only slider
+            Text(
+                text = "Color Pattern: $colorPatternIndex",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.clearAndSetSemantics { } // hide this Text
+            )
+            Slider(
+                value = colorPatternIndex.toFloat(),
+                onValueChange = {
+                    val idx = it.roundToInt().coerceIn(0, 5)
+                    colorPatternIndex = idx
+                    AppColors.setPattern(idx)
+                },
+                valueRange = 0f..5f,
+                steps = 4,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .semantics {
+                        role = Role.ValuePicker
+                        contentDescription = "Color Pattern"
+                    }
+            )
+
+            // 3) Font chooser: hide the label & name, expose only slider
+            Text(
+                text = "Choose Font: ${fontNames[fontIndex]}",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.clearAndSetSemantics { }
+            )
+            Slider(
+                value = fontIndex.toFloat(),
+                onValueChange = {
+                    val idx = it.roundToInt().coerceIn(0, fontOptions.lastIndex)
+                    uiSettings.setFontIndex(idx)
+                },
+                valueRange = 0f..fontOptions.lastIndex.toFloat(),
+                steps = fontOptions.size - 2,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .semantics {
+                        role = Role.ValuePicker
+                        contentDescription = "Choose Font"
+                    }
+            )
         }
     }
 }
