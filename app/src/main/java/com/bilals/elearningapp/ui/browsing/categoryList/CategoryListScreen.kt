@@ -32,19 +32,14 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
-import com.bilals.elearningapp.data.local.ElearningDatabase
-import com.bilals.elearningapp.data.repository.CourseCategoryRepository
-import com.bilals.elearningapp.di.AppContainer
+import com.bilals.elearningapp.serviceLocator.AppContainer
 import com.bilals.elearningapp.navigation.ScreenRoutes
 import com.bilals.elearningapp.tts.SpeechService
 import com.bilals.elearningapp.ui.theme.AppTypography
 import com.bilals.elearningapp.ui.uiComponents.AppBar
 import com.bilals.elearningapp.ui.uiComponents.AppCard
-import com.bilals.elearningapp.ui.uiComponents.BottomNavBar
 
 
 @Composable

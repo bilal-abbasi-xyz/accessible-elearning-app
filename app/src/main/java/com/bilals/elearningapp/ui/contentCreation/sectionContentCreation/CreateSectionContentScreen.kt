@@ -22,7 +22,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -35,13 +34,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.bilals.elearningapp.di.AppContainer
+import com.bilals.elearningapp.serviceLocator.AppContainer
 import com.bilals.elearningapp.navigation.ScreenRoutes
 import com.bilals.elearningapp.ui.contentCreation.browsing.categoryList.gradientBackground
 import com.bilals.elearningapp.ui.contentCreation.browsing.sectionDetail.SectionItems
 import com.bilals.elearningapp.ui.uiComponents.AppBar
 import com.bilals.elearningapp.ui.uiComponents.AppCard
-import com.bilals.elearningapp.ui.uiComponents.BottomNavBar
 
 @Composable
 fun CreateSectionContentScreen(
@@ -117,20 +115,20 @@ fun CreateSectionContentScreen(
                 showDialog = true
             }
 
-            // Resources Section
-            SectionItems(
-                items = resources,
-                sectionName = "Resources",
-                onItemClick = { resource ->
-                    navController.navigate(ScreenRoutes.ViewResource.createRoute(resource.id, resource.name))
-                },
-                itemName = { resource -> resource.name }
-            )
-
-            CreateButton(label = "Create New Resource") {
-                itemType = "Resource"
-                showDialog = true
-            }
+//            // Resources Section
+//            SectionItems(
+//                items = resources,
+//                sectionName = "Resources",
+//                onItemClick = { resource ->
+//                    navController.navigate(ScreenRoutes.ViewResource.createRoute(resource.id, resource.name))
+//                },
+//                itemName = { resource -> resource.name }
+//            )
+//
+//            CreateButton(label = "Create New Resource") {
+//                itemType = "Resource"
+//                showDialog = true
+//            }
         }
 
         // Bottom Navigation Bar

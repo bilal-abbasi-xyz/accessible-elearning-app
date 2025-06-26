@@ -40,7 +40,7 @@ class CreateSectionViewModel(
 
     init {
         viewModelScope.launch {
-            sectionRepository.syncSections(courseId)  // ✅ Check Room, fetch from Firebase if needed
+            sectionRepository.syncSections(courseId)  //  Check Room, fetch from Firebase if needed
         }
     }
 }

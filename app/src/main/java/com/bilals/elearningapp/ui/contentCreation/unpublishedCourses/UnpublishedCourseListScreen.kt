@@ -27,13 +27,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.bilals.elearningapp.data.model.Course
-import com.bilals.elearningapp.di.AppContainer
+import com.bilals.elearningapp.serviceLocator.AppContainer
 import com.bilals.elearningapp.navigation.ScreenRoutes
 import com.bilals.elearningapp.tts.SpeechService
 import com.bilals.elearningapp.ui.contentCreation.browsing.categoryList.gradientBackground
 import com.bilals.elearningapp.ui.uiComponents.AppBar
 import com.bilals.elearningapp.ui.uiComponents.AppCard
-import com.bilals.elearningapp.ui.uiComponents.BottomNavBar
 import com.bilals.elearningapp.ui.theme.AppTypography
 
 
@@ -101,7 +100,7 @@ fun UnpublishedCourseListScreen(
 fun CourseCard(course: Course, navController: NavController) {
     AppCard(onClick = {
         navController.navigate(ScreenRoutes.CreateSection.createRoute(course.id, course.name))
-    }) {  // ✅ Using AppCard with course's onClick navigation
+    }) {  //  Using AppCard with course's onClick navigation
         Row(
             modifier = Modifier
                 .fillMaxWidth()

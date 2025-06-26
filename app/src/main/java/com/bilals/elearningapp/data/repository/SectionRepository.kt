@@ -18,7 +18,7 @@ class SectionRepository(
     context: Context
 ) {
     private val firebaseService = FirebaseServiceSingleton.instance
-    private val dbSyncManager = DatabaseSyncManager(context) // ✅ Initialize DatabaseSyncManager
+    private val dbSyncManager = DatabaseSyncManager(context) //  Initialize DatabaseSyncManager
 
 
     // Fetch sections by courseId from Room (local database)

@@ -43,7 +43,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.bilals.elearningapp.data.model.RoleType
 import com.bilals.elearningapp.data.repository.AuthRepository
-import com.bilals.elearningapp.di.AppContainer
+import com.bilals.elearningapp.serviceLocator.AppContainer
 import com.bilals.elearningapp.navigation.ScreenRoutes
 import com.bilals.elearningapp.stt.STTManager
 import com.bilals.elearningapp.stt.SpeechInputHandler
@@ -158,7 +158,6 @@ fun AppContent(context: Context, uiSettingsViewModel: UISettingsViewModel) {
     val speechInputHandler =
         remember { SpeechInputHandler(context, navController, recognizedText, commandProcessor) }
 
-    RecognizedTextDisplay(recognizedText, context)
     SessionManager.saveActiveRole(RoleType.STUDENT, context)
 
     // Observe the current back-stack entry
@@ -169,7 +168,9 @@ fun AppContent(context: Context, uiSettingsViewModel: UISettingsViewModel) {
     val noBarRoutes = setOf(
         ScreenRoutes.AttemptQuiz.route,
         ScreenRoutes.ViewLecture.route,
-        ScreenRoutes.ProfileSettings.route
+        ScreenRoutes.ProfileSettings.route,
+        ScreenRoutes.CreateLecture.route,
+        ScreenRoutes.Training.route
     )
 
     Scaffold(
@@ -196,60 +197,8 @@ fun AppContent(context: Context, uiSettingsViewModel: UISettingsViewModel) {
                 speechInputHandler = speechInputHandler,
                 uiViewModel = uiSettingsViewModel
             )
-            // Optional overlay (e.g. RecognizedTextDisplay) can sit here too
-            RecognizedTextDisplay(recognizedText, context)
         }
     }
-}
-
-@OptIn(ExperimentalComposeUiApi::class)
-@Composable
-fun HandleSwipeGestures(speechInputHandler: SpeechInputHandler) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            // This lets pointer events pass through to underlying composables
-            .pointerInteropFilter { false }
-            // Now detect swipes without consuming the events
-            .pointerInput(Unit) {
-                awaitPointerEventScope {
-                    while (true) {
-                        val event = awaitPointerEvent(PointerEventPass.Final)
-                        val dragAmount = event.changes
-                            .firstOrNull()
-                            ?.positionChange()?.x ?: 0f
-                        if (dragAmount.absoluteValue > 50 && !speechInputHandler.isListening) {
-                            speechInputHandler.startListening()
-                        }
-                        // Do NOT consume any changes here!
-                    }
-                }
-            }
-    )
-}
-
-
-@Composable
-fun RecognizedTextDisplay(recognizedText: MutableState<String>, context: Context) {
-
-    Spacer(modifier = Modifier.height(16.dp))
-
-    LaunchedEffect(recognizedText.value) {
-        if (recognizedText.value.isNotEmpty()) {
-            val briefText = recognizedText.value.split(" ").take(3).joinToString(" ")
-//            Toast.makeText(context, "You said: $briefText", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-//    Text(
-//        text = if (recognizedText.value.isNotEmpty()) {
-//            recognizedText.value
-//        } else {
-//            "Say something..."
-//        },
-//        fontSize = 24.sp,
-//        fontWeight = FontWeight.Normal,
-//    )
 }
 
 @Composable

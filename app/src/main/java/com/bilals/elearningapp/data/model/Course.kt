@@ -24,7 +24,7 @@ data class Course(
     val maxPoints: Int = 0,
 
     @get:PropertyName("isPublished") @set:PropertyName("isPublished")
-    var isPublished: Boolean = false // ✅ Fix: Firestore will now properly map this
+    var isPublished: Boolean = false //  Fix: Firestore will now properly map this
 ) {
-    constructor() : this("", "", "", "", 0, false) // ✅ Firestore needs this empty constructor
+    constructor() : this("", "", "", "", 0, false) //  Firestore needs this empty constructor
 }

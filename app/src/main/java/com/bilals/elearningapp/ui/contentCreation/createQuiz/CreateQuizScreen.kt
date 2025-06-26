@@ -1,7 +1,6 @@
 package com.bilals.elearningapp.ui.contentCreation.createQuiz
 
 
-
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -12,7 +11,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -24,10 +22,11 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -42,12 +41,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.bilals.elearningapp.data.model.quiz.Answer
-import com.bilals.elearningapp.di.AppContainer
+import com.bilals.elearningapp.serviceLocator.AppContainer
 import com.bilals.elearningapp.ui.contentCreation.browsing.categoryList.gradientBackground
 import com.bilals.elearningapp.ui.theme.AppTypography
 import com.bilals.elearningapp.ui.uiComponents.AppBar
 import com.bilals.elearningapp.ui.uiComponents.AppCard
-import com.bilals.elearningapp.ui.uiComponents.BottomNavBar
 
 @Composable
 fun CreateQuizScreen(
@@ -57,7 +55,13 @@ fun CreateQuizScreen(
     appContainer: AppContainer
 ) {
     val context = LocalContext.current
-    val viewModel = remember { CreateQuizViewModel(appContainer.questionRepository, appContainer.answerRepository, quizId) }
+    val viewModel = remember {
+        CreateQuizViewModel(
+            appContainer.questionRepository,
+            appContainer.answerRepository,
+            quizId
+        )
+    }
 
     val questions by viewModel.questions.collectAsState()
     val currentIndex by viewModel.currentIndex.collectAsState()
@@ -161,7 +165,11 @@ fun CreateQuizScreen(
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(imageVector = Icons.Default.Add, contentDescription = "Add Question", tint = Color.White)
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Add Question",
+                            tint = Color.White
+                        )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text("Add Question", color = Color.White, style = AppTypography.bodySmall)
                     }
@@ -173,7 +181,13 @@ fun CreateQuizScreen(
                         .weight(1f)
                         .clickable {
                             if (currentQuestion != null && currentAnswers.size >= 4) {
-                                Toast.makeText(context, "Cannot add more than 4 answers", Toast.LENGTH_SHORT).show()
+                                Toast
+                                    .makeText(
+                                        context,
+                                        "Cannot add more than 4 answers",
+                                        Toast.LENGTH_SHORT
+                                    )
+                                    .show()
                             } else {
                                 showAnswerDialog = true
                             }
@@ -186,7 +200,11 @@ fun CreateQuizScreen(
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(imageVector = Icons.Default.Add, contentDescription = "Add Answer", tint = Color.White)
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Add Answer",
+                            tint = Color.White
+                        )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text("Add Answer", color = Color.White, style = AppTypography.bodySmall)
                     }
@@ -197,7 +215,7 @@ fun CreateQuizScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
+                    .padding(24.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 if (currentIndex > 0) {
@@ -230,32 +248,48 @@ fun CreateQuizScreen(
             onDismissRequest = { showQuestionDialog = false },
             title = { Text("Enter Question Text") },
             text = {
-                TextField(
-                    value = newQuestionText,
-                    onValueChange = { newQuestionText = it },
-                    label = { Text("Question") }
-                )
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        if (newQuestionText.isNotBlank()) {
-                            viewModel.createQuestion(newQuestionText)
-                            newQuestionText = ""
-                            showQuestionDialog = false
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    TextField(
+                        value = newQuestionText,
+                        onValueChange = { newQuestionText = it },
+                        label = { Text("Question") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Button(
+                            onClick = {
+                                if (newQuestionText.isNotBlank()) {
+                                    viewModel.createQuestion(newQuestionText)
+                                    newQuestionText = ""
+                                    showQuestionDialog = false
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Save")
+                        }
+
+                        OutlinedButton(
+                            onClick = { showQuestionDialog = false },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Cancel")
                         }
                     }
-                ) {
-                    Text("Save")
                 }
             },
-            dismissButton = {
-                TextButton(onClick = { showQuestionDialog = false }) {
-                    Text("Cancel")
-                }
-            }
+            confirmButton = {},
+            dismissButton = {}
         )
     }
+
 
     // Popup Dialog for Adding New Answer
     if (showAnswerDialog) {
@@ -263,86 +297,118 @@ fun CreateQuizScreen(
             onDismissRequest = { showAnswerDialog = false },
             title = { Text("Enter Answer Text & Mark Correct") },
             text = {
-                Column {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
                     TextField(
                         value = newAnswerText,
                         onValueChange = { newAnswerText = it },
-                        label = { Text("Answer") }
+                        label = { Text("Answer") },
+                        modifier = Modifier.fillMaxWidth()
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Text("Correct?")
                         Spacer(modifier = Modifier.width(8.dp))
-                        androidx.compose.material3.Checkbox(
+                        Checkbox(
                             checked = newAnswerIsCorrect,
                             onCheckedChange = { newAnswerIsCorrect = it }
                         )
                     }
-                }
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        if (newAnswerText.isNotBlank() && currentQuestion != null && currentAnswers.size < 4) {
-                            viewModel.createAnswer(newAnswerText, newAnswerIsCorrect)
-                            newAnswerText = ""
-                            newAnswerIsCorrect = false
-                            showAnswerDialog = false
+
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Button(
+                            onClick = {
+                                if (newAnswerText.isNotBlank() && currentQuestion != null && currentAnswers.size < 4) {
+                                    viewModel.createAnswer(newAnswerText, newAnswerIsCorrect)
+                                    newAnswerText = ""
+                                    newAnswerIsCorrect = false
+                                    showAnswerDialog = false
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Save")
+                        }
+
+                        OutlinedButton(
+                            onClick = { showAnswerDialog = false },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Cancel")
                         }
                     }
-                ) {
-                    Text("Save")
                 }
             },
-            dismissButton = {
-                TextButton(onClick = { showAnswerDialog = false }) {
-                    Text("Cancel")
-                }
-            }
+            confirmButton = {},
+            dismissButton = {}
         )
     }
 
-    // Popup Dialog for Editing an Existing Answer
+
     if (editAnswer != null) {
         AlertDialog(
             onDismissRequest = { editAnswer = null },
             title = { Text("Edit Answer") },
             text = {
-                Column {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
                     TextField(
                         value = editAnswerText,
                         onValueChange = { editAnswerText = it },
-                        label = { Text("Answer") }
+                        label = { Text("Answer") },
+                        modifier = Modifier.fillMaxWidth()
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
+
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text("Correct?")
                         Spacer(modifier = Modifier.width(8.dp))
-                        androidx.compose.material3.Checkbox(
+                        Checkbox(
                             checked = editAnswerIsCorrect,
                             onCheckedChange = { editAnswerIsCorrect = it }
                         )
                     }
-                }
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        // Ensure answer text is not blank and that if setting as correct, no other answer remains marked correct.
-                        if (editAnswerText.isNotBlank() && currentQuestion != null) {
-                            viewModel.updateAnswer(editAnswer!!.id, editAnswerText, editAnswerIsCorrect)
-                            editAnswer = null
+
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Button(
+                            onClick = {
+                                if (editAnswerText.isNotBlank() && currentQuestion != null) {
+                                    viewModel.updateAnswer(
+                                        editAnswer!!.id,
+                                        editAnswerText,
+                                        editAnswerIsCorrect
+                                    )
+                                    editAnswer = null
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Save")
+                        }
+
+                        OutlinedButton(
+                            onClick = { editAnswer = null },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Cancel")
                         }
                     }
-                ) {
-                    Text("Save")
                 }
             },
-            dismissButton = {
-                TextButton(onClick = { editAnswer = null }) {
-                    Text("Cancel")
-                }
-            }
+            confirmButton = {},
+            dismissButton = {}
         )
     }
+
 }

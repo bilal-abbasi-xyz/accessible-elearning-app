@@ -17,7 +17,7 @@ class QuizRepository(
     context: Context
 ) {
     private val firebaseService = FirebaseServiceSingleton.instance
-    private val dbSyncManager = DatabaseSyncManager(context) // ✅ Initialize DatabaseSyncManager
+    private val dbSyncManager = DatabaseSyncManager(context) //  Initialize DatabaseSyncManager
 
     // Fetch quizzes by sectionId from Room (local database)
     fun getQuizzes(sectionId: String): Flow<List<Quiz>> {

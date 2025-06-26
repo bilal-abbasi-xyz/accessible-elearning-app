@@ -7,7 +7,6 @@ import androidx.compose.runtime.MutableState
 import androidx.navigation.NavController
 import com.bilals.elearningapp.navigation.ScreenRoutes
 import com.bilals.elearningapp.tts.TTSManager
-import org.apache.commons.text.similarity.CosineSimilarity
 
 class SpeechInputHandler(
     private val context: Context,
@@ -19,8 +18,8 @@ class SpeechInputHandler(
 ) {
 
     var onSpeechHeading: (() -> Unit)? = null
-    var onSpeechBold:    (() -> Unit)? = null
-    var onSpeechList:    (() -> Unit)? = null
+    var onSpeechBold: (() -> Unit)? = null
+    var onSpeechList: (() -> Unit)? = null
     var onSpeechNewLine: (() -> Unit)? = null
 
     var isListening = false
@@ -40,7 +39,6 @@ class SpeechInputHandler(
         "report" to ScreenRoutes.Report.route,
         "page UI" to ScreenRoutes.UISettings.route
     )
-
 
     private val commandVariations = mapOf(
         "settings" to listOf("settings", "open settings", "modify settings", "show settings"),
@@ -124,11 +122,11 @@ class SpeechInputHandler(
             ?.route
             ?.substringBefore("/{")
         if (currentRoute == ScreenRoutes.CreateLecture.route) {
-            when(spokenText.lowercase().trim()) {
-                "heading"   -> onSpeechHeading?.invoke().also { return }
-                "bold"      -> onSpeechBold?.invoke().also    { return }
-                "list"      -> onSpeechList?.invoke().also    { return }
-                "new line"  -> onSpeechNewLine?.invoke().also { return }
+            when (spokenText.lowercase().trim()) {
+                "heading" -> onSpeechHeading?.invoke().also { return }
+                "bold" -> onSpeechBold?.invoke().also { return }
+                "list" -> onSpeechList?.invoke().also { return }
+                "new line" -> onSpeechNewLine?.invoke().also { return }
             }
         }
 
@@ -161,8 +159,8 @@ class SpeechInputHandler(
     private fun findBestMatch(input: String): String? {
         val words = input.lowercase().trim().split(" ")
 
-        // ✅ Ensure bidirectional synonym mapping
-        // ✅ Ensure bidirectional synonym mapping
+        //  Ensure bidirectional synonym mapping
+        //  Ensure bidirectional synonym mapping
         val bidirectionalSynonyms = mutableMapOf<String, MutableList<String>>()
 
         synonyms.forEach { (key, values) ->
@@ -176,7 +174,7 @@ class SpeechInputHandler(
         }
 
 
-        // ✅ Generate all possible replacements
+        // Generate all possible replacements
         val expandedInputs = mutableSetOf<String>()
         fun generateCombinations(currentWords: List<String>, index: Int) {
             if (index == words.size) {
@@ -199,7 +197,7 @@ class SpeechInputHandler(
         // 🔹 Debug: Print all generated variations
         Log.d("VoiceCommand", "Generated Variations: $expandedInputs")
 
-        // ✅ Now check for an exact match in commandVariations
+        //  Now check for an exact match in commandVariations
         for (expanded in expandedInputs) {
             for ((command, variations) in commandVariations) {
                 if (expanded in variations) {
@@ -209,37 +207,6 @@ class SpeechInputHandler(
         }
 
         return null // No match found
-    }
-
-
-    // Your original similarity matching function
-    private fun findBestMatchWithSimilarity(input: String): String? {
-        val cosineSimilarity = CosineSimilarity()
-        var bestMatch: String? = null
-        var highestScore = 0.0
-
-        // Convert text into a frequency map of words (Map<CharSequence, Int>)
-        fun textToVector(text: String): Map<CharSequence, Int> {
-            return text.split(" ")
-                .groupingBy { it }
-                .eachCount()
-        }
-
-        val inputVector = textToVector(input)
-
-        for ((screen, variations) in commandVariations) {
-            for (phrase in variations) {
-                val phraseVector = textToVector(phrase)
-                val similarityScore = cosineSimilarity.cosineSimilarity(phraseVector, inputVector)
-
-                if (similarityScore > highestScore) {
-                    highestScore = similarityScore
-                    bestMatch = screen
-                }
-            }
-        }
-
-        return if (highestScore > 0.6) bestMatch else null
     }
 
 

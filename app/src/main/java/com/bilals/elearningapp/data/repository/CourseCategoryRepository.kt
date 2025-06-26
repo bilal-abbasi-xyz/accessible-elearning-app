@@ -18,18 +18,18 @@ class CourseCategoryRepository(
     context: Context
 ) {
     private val firebaseService = FirebaseServiceSingleton.instance // Use the singleton instance
-    private val dbSyncManager = DatabaseSyncManager(context) // ✅ Initialize DatabaseSyncManager
+    private val dbSyncManager = DatabaseSyncManager(context) //  Initialize DatabaseSyncManager
 
     val allCategories: Flow<List<CourseCategory>> = categoryDao.getAllCategories()
 
     suspend fun syncCategories() {
-        dbSyncManager.syncCategories() // ✅ Call syncCategories from DatabaseSyncManager
+        dbSyncManager.syncCategories() //  Call syncCategories from DatabaseSyncManager
     }
 
     fun listenForUpdates() {
         firebaseService.listenForCategoryUpdates { categories ->
             CoroutineScope(Dispatchers.IO).launch {
-                categoryDao.insertCategories(categories)  // ✅ Insert or update changed categories
+                categoryDao.insertCategories(categories)  //  Insert or update changed categories
             }
         }
     }
@@ -41,10 +41,10 @@ class CourseCategoryRepository(
         val originalInput = input.lowercase()
         val normalizedInput = TextMatchingUtils.replaceSynonyms(originalInput)
 
-        // ✅ Convert Flow<List<CourseCategory>> to List<CourseCategory>
+        //  Convert Flow<List<CourseCategory>> to List<CourseCategory>
         val allCategories = categoryDao.getAllCategories().firstOrNull() ?: emptyList()
 
-        // ✅ Now, we can use firstOrNull, forEach, minByOrNull correctly
+        //  Now, we can use firstOrNull, forEach, minByOrNull correctly
         allCategories.firstOrNull { it.name.lowercase() == originalInput }?.let { return it }
         allCategories.firstOrNull { it.name.lowercase().contains(originalInput) }?.let { return it }
 
@@ -54,7 +54,7 @@ class CourseCategoryRepository(
             if (categoryNameWithSynonyms.contains(normalizedInput)) return category
         }
 
-        // ✅ 4. Fuzzy Matching (ONLY if similarity is high enough)
+        //  4. Fuzzy Matching (ONLY if similarity is high enough)
         val bestMatch = allCategories.minByOrNull {
             TextMatchingUtils.levenshteinDistance(it.name.lowercase(), normalizedInput)
         }

@@ -81,7 +81,7 @@ fun AttemptQuizScreen(navController: NavController, quizId: String, quizName: St
 
     val currentQuestion = questions.getOrNull(currentIndex)
 //    val selectedAnswerId by viewModel.selectedAnswerId.collectAsState()
-    // ✅ This LaunchedEffect runs only once at initial composition
+    //  This LaunchedEffect runs only once at initial composition
     LaunchedEffect(Unit) {
         SpeechService.announce(context, "$quizName Quiz is shown")
     }

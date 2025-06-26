@@ -16,8 +16,8 @@ class CourseListViewModel(
 
     init {
         viewModelScope.launch {
-            repository.syncCourses(categoryId)  // ✅ Check Room, fetch from Firebase if needed
+            repository.syncCourses(categoryId)  //  Check Room, fetch from Firebase if needed
         }
-//        repository.listenForUpdates(categoryId)  // ✅ Start real-time updates
+//        repository.listenForUpdates(categoryId)  //  Start real-time updates
     }
 }

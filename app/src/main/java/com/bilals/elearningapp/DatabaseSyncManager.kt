@@ -106,7 +106,7 @@ class DatabaseSyncManager(context: Context) {
         val categoriesToDelete = localCategories.filter { it.id !in categoryIdsInFirebase }
 
         if (categoriesToDelete.isNotEmpty()) {
-            categoryDao.deleteCategories(categoriesToDelete) // ✅ Delete from Room
+            categoryDao.deleteCategories(categoriesToDelete) //  Delete from Room
         }
     }
 
@@ -162,7 +162,7 @@ class DatabaseSyncManager(context: Context) {
         val coursesToDelete = localCourses.filter { it.id !in courseIdsInFirebase }
 
         if (coursesToDelete.isNotEmpty()) {
-            courseDao.deleteCourses(coursesToDelete) // ✅ Delete from Room
+            courseDao.deleteCourses(coursesToDelete) //  Delete from Room
         }
     }
 
@@ -213,7 +213,7 @@ class DatabaseSyncManager(context: Context) {
         val sectionsToDelete = localSections.filter { it.id !in sectionIdsInFirebase }
 
         if (sectionsToDelete.isNotEmpty()) {
-            sectionDao.deleteSections(sectionsToDelete) // ✅ Delete from Room
+            sectionDao.deleteSections(sectionsToDelete) //  Delete from Room
         }
 
     }
@@ -312,7 +312,7 @@ class DatabaseSyncManager(context: Context) {
         val lecturesToDelete = localLectures.filter { it.id !in lectureIdsInFirebase }
 
         if (lecturesToDelete.isNotEmpty()) {
-            lectureDao.deleteLectures(lecturesToDelete) // ✅ Delete from Room
+            lectureDao.deleteLectures(lecturesToDelete) //  Delete from Room
         }
 
     }
@@ -387,7 +387,7 @@ class DatabaseSyncManager(context: Context) {
         val resourcesToDelete = localResources.filter { it.id !in resourceIdsInFirebase }
 
         if (resourcesToDelete.isNotEmpty()) {
-            resourceDao.deleteResources(resourcesToDelete) // ✅ Delete from Room
+            resourceDao.deleteResources(resourcesToDelete) //  Delete from Room
         }
     }
 
@@ -443,7 +443,7 @@ class DatabaseSyncManager(context: Context) {
         val quizzesToDelete = localQuizzes.filter { it.id !in quizIdsInFirebase }
 
         if (quizzesToDelete.isNotEmpty()) {
-            quizDao.deleteQuizzes(quizzesToDelete) // ✅ Delete from Room
+            quizDao.deleteQuizzes(quizzesToDelete) //  Delete from Room
         }
     }
 
@@ -499,7 +499,7 @@ class DatabaseSyncManager(context: Context) {
 
 
         if (questionsToDelete.isNotEmpty()) {
-            questionDao.deleteQuestions(questionsToDelete) // ✅ Delete from Room
+            questionDao.deleteQuestions(questionsToDelete) //  Delete from Room
         }
     }
 
@@ -554,14 +554,14 @@ class DatabaseSyncManager(context: Context) {
         val answersToDelete = localAnswers.filter { it.id !in answerIdsInFirebase }
 
         if (answersToDelete.isNotEmpty()) {
-            answerDao.deleteAnswers(answersToDelete) // ✅ Delete from Room
+            answerDao.deleteAnswers(answersToDelete) //  Delete from Room
         }
     }
 
 
     suspend fun syncChatMessages(courseId: String) {
-        val firebaseMessages = firebaseService.getMessages(courseId) // ✅ Fetch from Firebase
-        val localMessages = chatMessageDao.getMessages(courseId).first() // ✅ Fetch from Room
+        val firebaseMessages = firebaseService.getMessages(courseId) //  Fetch from Firebase
+        val localMessages = chatMessageDao.getMessages(courseId).first() //  Fetch from Room
 
         // Find messages that need to be inserted or updated
         val messagesToInsertOrUpdate = firebaseMessages.filter { firebaseMessage ->
@@ -571,7 +571,7 @@ class DatabaseSyncManager(context: Context) {
 
         // Insert or update messages in the local database
         if (messagesToInsertOrUpdate.isNotEmpty()) {
-            chatMessageDao.insertMessages(messagesToInsertOrUpdate) // ✅ Insert new/updated messages
+            chatMessageDao.insertMessages(messagesToInsertOrUpdate) //  Insert new/updated messages
         }
 
         // Find messages that are locally stored but not present in Firebase (these should be deleted)
@@ -583,13 +583,13 @@ class DatabaseSyncManager(context: Context) {
         if (messagesToDelete.isNotEmpty()) {
             // Get the list of ids of the messages to be deleted
             val messageIdsToDelete = messagesToDelete.map { it.id }
-            chatMessageDao.deleteMessages(messageIdsToDelete) // ✅ Remove deleted messages from Room
+            chatMessageDao.deleteMessages(messageIdsToDelete) //  Remove deleted messages from Room
         }
     }
 
     suspend fun syncPublicChatMessages() {
-        val firebaseMessages = firebaseService.getPublicMessages() // ✅ Fetch from Firebase
-        val localMessages = publicChatMessageDao.getMessages().first() // ✅ Fetch from Room
+        val firebaseMessages = firebaseService.getPublicMessages() //  Fetch from Firebase
+        val localMessages = publicChatMessageDao.getMessages().first() //  Fetch from Room
 
         // Find messages that need to be inserted or updated
         val messagesToInsertOrUpdate = firebaseMessages.filter { firebaseMessage ->
@@ -599,7 +599,7 @@ class DatabaseSyncManager(context: Context) {
 
         // Insert or update messages in the local database
         if (messagesToInsertOrUpdate.isNotEmpty()) {
-            publicChatMessageDao.insertMessages(messagesToInsertOrUpdate) // ✅ Insert new/updated messages
+            publicChatMessageDao.insertMessages(messagesToInsertOrUpdate) //  Insert new/updated messages
         }
 
         // Find messages that are locally stored but not present in Firebase (delete them)
@@ -610,7 +610,7 @@ class DatabaseSyncManager(context: Context) {
         // Delete messages from the local database that are not in Firebase
         if (messagesToDelete.isNotEmpty()) {
             val messageIdsToDelete = messagesToDelete.map { it.id }
-            publicChatMessageDao.deleteMessages(messageIdsToDelete) // ✅ Remove deleted messages from Room
+            publicChatMessageDao.deleteMessages(messageIdsToDelete) //  Remove deleted messages from Room
         }
     }
 

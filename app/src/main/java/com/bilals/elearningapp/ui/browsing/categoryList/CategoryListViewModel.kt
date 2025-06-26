@@ -46,9 +46,9 @@ class CategoryListViewModel(
 
     init {
         viewModelScope.launch {
-            repository.syncCategories()  // ✅ Check if Room is empty, fetch from Firebase if needed
+            repository.syncCategories()  //  Check if Room is empty, fetch from Firebase if needed
         }
-//        repository.listenForUpdates()  // ✅ Start listening for real-time updates
+//        repository.listenForUpdates()  //  Start listening for real-time updates
     }
 }
 

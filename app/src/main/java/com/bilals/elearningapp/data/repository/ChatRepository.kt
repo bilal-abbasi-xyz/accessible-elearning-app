@@ -15,7 +15,7 @@ class ChatRepository(
     private val chatMessageDao: ChatMessageDao,
     context: Context
 ) {
-    private val dbSyncManager = DatabaseSyncManager(context) // ✅ Initialize DatabaseSyncManager
+    private val dbSyncManager = DatabaseSyncManager(context) //  Initialize DatabaseSyncManager
 
     private val firebaseService = FirebaseServiceSingleton.instance
 
@@ -23,12 +23,12 @@ class ChatRepository(
         dbSyncManager.syncChatMessages(courseId)
     }
 
-    // ✅ Get messages from Room (local database)
+    //  Get messages from Room (local database)
     fun getMessages(courseId: String): Flow<List<ChatMessage>> {
         return chatMessageDao.getMessages(courseId)
     }
 
-    // ✅ Fetch messages from Firestore and store in Room
+    //  Fetch messages from Firestore and store in Room
     suspend fun fetchMessages(courseId: String) {
         val messages = firebaseService.getMessages(courseId) // Get from Firestore
         chatMessageDao.insertMessages(messages) // Store in Room DB
@@ -39,11 +39,11 @@ class ChatRepository(
             CoroutineScope(Dispatchers.IO).launch {
                 when (changeType) {
                     DocumentChange.Type.ADDED, DocumentChange.Type.MODIFIED -> {
-                        chatMessageDao.insertMessages(listOf(newMessage)) // ✅ Insert/update
+                        chatMessageDao.insertMessages(listOf(newMessage)) //  Insert/update
                     }
 
                     DocumentChange.Type.REMOVED -> {
-                        chatMessageDao.deleteMessageById(newMessage.id) // ✅ Delete from Room
+                        chatMessageDao.deleteMessageById(newMessage.id) //  Delete from Room
                     }
                 }
             }
@@ -51,7 +51,7 @@ class ChatRepository(
     }
 
 
-    // ✅ Send message (Text or Audio)
+    //  Send message (Text or Audio)
     fun sendMessage(courseId: String, message: ChatMessage) {
         firebaseService.sendMessage(courseId, message) { success ->
             if (success) {
@@ -62,7 +62,7 @@ class ChatRepository(
         }
     }
 
-    // ✅ Clear all messages for a course (if needed)
+    //  Clear all messages for a course (if needed)
     suspend fun clearMessages(courseId: String) {
         chatMessageDao.clearMessages(courseId)
     }

@@ -1,7 +1,6 @@
 package com.bilals.elearningapp.ui.contentCreation.browsing.courseList
 
 import CourseListViewModel
-import CourseRepository
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -32,15 +31,13 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.bilals.elearningapp.data.local.ElearningDatabase
 import com.bilals.elearningapp.data.model.Course
-import com.bilals.elearningapp.di.AppContainer
+import com.bilals.elearningapp.serviceLocator.AppContainer
 import com.bilals.elearningapp.navigation.ScreenRoutes
 import com.bilals.elearningapp.tts.SpeechService
 import com.bilals.elearningapp.ui.contentCreation.browsing.categoryList.gradientBackground
 import com.bilals.elearningapp.ui.uiComponents.AppBar
 import com.bilals.elearningapp.ui.uiComponents.AppCard
-import com.bilals.elearningapp.ui.uiComponents.BottomNavBar
 import com.bilals.elearningapp.ui.theme.AppTypography
 
 
@@ -105,7 +102,7 @@ fun CourseCard(course: Course, navController: NavController) {
         modifier = Modifier
             .semantics { contentDescription = "" } // ⛔ Prevents TalkBack from reading automatically
             .clickable {
-                // ✅ Using AppCard with course's onClick navigation
+                //  Using AppCard with course's onClick navigation
                 navController.navigate(
                     ScreenRoutes.CourseDetail.createRoute(
                         course.id,

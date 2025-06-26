@@ -22,7 +22,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -49,7 +48,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import com.bilals.elearningapp.data.model.Lecture
 import com.bilals.elearningapp.data.model.LectureType
-import com.bilals.elearningapp.di.AppContainer
+import com.bilals.elearningapp.serviceLocator.AppContainer
 import com.bilals.elearningapp.tts.SpeechService
 import com.bilals.elearningapp.ui.uiComponents.AppCard
 import io.noties.markwon.Markwon

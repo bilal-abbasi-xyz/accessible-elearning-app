@@ -13,19 +13,19 @@ class CourseForumViewModel(
     courseId: String
 ) : ViewModel() {
 
-    // ✅ StateFlow to hold messages list
+    //  StateFlow to hold messages list
     private val _messages = MutableStateFlow<List<ChatMessage>>(emptyList())
     val messages: StateFlow<List<ChatMessage>> = _messages
 
     init {
         viewModelScope.launch {
-            repository.syncChatMessages(courseId)  // ✅ Sync when screen opens
+            repository.syncChatMessages(courseId)  //  Sync when screen opens
         }
         fetchMessages(courseId)
-        listenForUpdates(courseId) // ✅ Now passing courseId correctly
+        listenForUpdates(courseId) //  Now passing courseId correctly
     }
 
-    // ✅ Fetch messages from Room (local database)
+    //  Fetch messages from Room (local database)
     private fun fetchMessages(courseId: String) {
         viewModelScope.launch {
             repository.getMessages(courseId).collect { chatMessages ->
@@ -59,7 +59,7 @@ class CourseForumViewModel(
         }
     }
 
-    // ✅ Send Audio Message (TODO: Implement audio handling)
+    //  Send Audio Message (TODO: Implement audio handling)
     fun sendAudioMessage(courseId: String, audioUrl: String) {
         viewModelScope.launch {
             val message = ChatMessage(

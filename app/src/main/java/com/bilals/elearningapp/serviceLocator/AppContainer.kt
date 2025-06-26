@@ -1,4 +1,4 @@
-package com.bilals.elearningapp.di
+package com.bilals.elearningapp.serviceLocator
 
 import CourseRepository
 import android.content.Context

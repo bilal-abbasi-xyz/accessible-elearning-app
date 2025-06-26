@@ -7,26 +7,23 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.automirrored.filled.Comment
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Feedback
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,14 +36,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.bilals.elearningapp.di.AppContainer
+import com.bilals.elearningapp.serviceLocator.AppContainer
 import com.bilals.elearningapp.navigation.ScreenRoutes
-import com.bilals.elearningapp.tts.SpeechService
 import com.bilals.elearningapp.ui.contentCreation.browsing.categoryList.gradientBackground
-import com.bilals.elearningapp.ui.theme.AppTypography
 import com.bilals.elearningapp.ui.uiComponents.AppBar
 import com.bilals.elearningapp.ui.uiComponents.AppCard
-import com.bilals.elearningapp.ui.uiComponents.BottomNavBar
 import com.bilals.elearningapp.ui.uiComponents.SectionHeading
 
 
@@ -180,29 +174,45 @@ fun CreateSectionScreen(
             onDismissRequest = { showDialog = false },
             title = { Text("Choose Section Name") },
             text = {
-                TextField(
-                    value = newSectionName,
-                    onValueChange = { newSectionName = it },
-                    label = { Text("Section Name") }
-                )
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        if (newSectionName.isNotBlank()) {
-                            viewModel.createSection(newSectionName)
-                            showDialog = false
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    TextField(
+                        value = newSectionName,
+                        onValueChange = { newSectionName = it },
+                        label = { Text("Section Name") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Button(
+                            onClick = {
+                                if (newSectionName.isNotBlank()) {
+                                    viewModel.createSection(newSectionName)
+                                    showDialog = false
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Save")
+                        }
+
+                        OutlinedButton(
+                            onClick = { showDialog = false },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Cancel")
                         }
                     }
-                ) {
-                    Text("Save")
                 }
             },
-            dismissButton = {
-                TextButton(onClick = { showDialog = false }) {
-                    Text("Cancel")
-                }
-            }
+            confirmButton = {},
+            dismissButton = {}
         )
     }
+
 }

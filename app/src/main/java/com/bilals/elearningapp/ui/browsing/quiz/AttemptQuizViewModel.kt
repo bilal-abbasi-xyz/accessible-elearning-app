@@ -41,7 +41,7 @@ class AttemptQuizViewModel(
         viewModelScope.launch {
             questionRepository.syncQuestions(quizId) // Ensure Firebase → Room sync happens first
 
-            questions.collect { questionList ->  // ✅ Use collect instead of collectLatest
+            questions.collect { questionList ->  //  Use collect instead of collectLatest
                 Log.d("QuizApp", "Total Questions: ${questionList.size}")
                 questionList.forEach { question ->
                     Log.d("QuizApp", "Question: ${question.text}")

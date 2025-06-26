@@ -19,24 +19,24 @@ class PublicChatRepository(
     private val dbSyncManager = DatabaseSyncManager(context) // Handles offline sync
     private val firebaseService = FirebaseServiceSingleton.instance // Firestore access
 
-    // ✅ Sync messages between Firestore & Room (on app launch)
+    //  Sync messages between Firestore & Room (on app launch)
     suspend fun syncPublicChatMessages() {
         dbSyncManager.syncPublicChatMessages()
     }
 
-    // ✅ Get messages from Room (local database)
+    //  Get messages from Room (local database)
     fun getMessages(): Flow<List<PublicChatMessage>> {
         return publicChatMessageDao.getMessages()
     }
 
-    // ✅ Fetch messages from Firestore and store in Room
+    //  Fetch messages from Firestore and store in Room
     suspend fun fetchMessages() {
         val messages = firebaseService.getPublicMessages() // Fetch from Firestore
         publicChatMessageDao.insertMessages(messages) // Store in Room DB
     }
 
 
-    // ✅ Send message (Text or Audio)
+    //  Send message (Text or Audio)
     fun sendMessage(message: PublicChatMessage) {
         firebaseService.sendPublicMessage(message) { success ->
             if (success) {
@@ -47,12 +47,12 @@ class PublicChatRepository(
         }
     }
 
-    // ✅ Clear all public messages (if needed)
+    //  Clear all public messages (if needed)
     suspend fun clearAllMessages() {
         publicChatMessageDao.clearAllMessages()
     }
 
-    // ✅ Listen for real-time updates from Firestore
+    //  Listen for real-time updates from Firestore
     fun listenForMessageUpdates() {
         firebaseService.listenForPublicMessages { newMessage, changeType ->
             CoroutineScope(Dispatchers.IO).launch {

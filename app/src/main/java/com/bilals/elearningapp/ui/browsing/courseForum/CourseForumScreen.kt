@@ -36,7 +36,6 @@ import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -54,7 +53,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
@@ -70,13 +68,12 @@ import com.bilals.elearningapp.SessionManager
 import com.bilals.elearningapp.data.local.ElearningDatabase
 import com.bilals.elearningapp.data.model.ChatMessage
 import com.bilals.elearningapp.data.repository.ChatRepository
-import com.bilals.elearningapp.di.AppContainer
+import com.bilals.elearningapp.serviceLocator.AppContainer
 import com.bilals.elearningapp.navigation.ScreenRoutes
 import com.bilals.elearningapp.tts.SpeechService
 import com.bilals.elearningapp.ui.contentCreation.browsing.categoryList.gradientBackground
 import com.bilals.elearningapp.ui.theme.AppTypography
 import com.bilals.elearningapp.ui.uiComponents.AppBar
-import com.bilals.elearningapp.ui.uiComponents.BottomNavBar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -478,6 +475,6 @@ fun ChatBubble(
 
 
 
-// ✅ Background Gradient
+//  Background Gradient
 @Composable
 fun gradientBackground() = Brush.verticalGradient(listOf(Color(0xFFEAEAEA), Color(0xFFCCCCCC)))

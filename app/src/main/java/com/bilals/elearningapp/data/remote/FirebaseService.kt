@@ -35,21 +35,21 @@ class FirebaseService {
 
     fun listenForCourseUpdates(categoryId: String, onDataChange: (List<Course>) -> Unit) {
         firestore.collection("course_categories")  // 🔥 Top-level collection
-            .document(categoryId)  // ✅ Select the correct category
+            .document(categoryId)  //  Select the correct category
             .collection("courses")  // 🔥 Access subcollection inside the category
             .addSnapshotListener { snapshot, _ ->
                 snapshot?.let {
                     val courses = it.documents.mapNotNull { doc ->
                         doc.toObject(Course::class.java)?.copy(id = doc.id)
                     }
-                    onDataChange(courses)  // ✅ Pass updated courses
+                    onDataChange(courses)  //  Pass updated courses
                 }
             }
     }
 
     fun listenForSectionUpdates(courseId: String, onDataChange: (List<Section>) -> Unit) {
         firestore.collectionGroup("courses")  // 🔥 Search all "courses" subcollections
-            .whereEqualTo(FieldPath.documentId(), courseId)  // ✅ Find course by ID
+            .whereEqualTo(FieldPath.documentId(), courseId)  //  Find course by ID
             .limit(1)  // 🚀 Only fetch one document (since ID is unique)
             .get()
             .addOnSuccessListener { querySnapshot ->
@@ -60,7 +60,7 @@ class FirebaseService {
                             val sections = it.documents.mapNotNull { doc ->
                                 doc.toObject(Section::class.java)?.copy(id = doc.id)
                             }
-                            onDataChange(sections)  // ✅ Pass updated sections
+                            onDataChange(sections)  //  Pass updated sections
                         }
                     }
             }
@@ -517,7 +517,7 @@ class FirebaseService {
                                     onMessageChange(
                                         message,
                                         change.type
-                                    ) // ✅ Callback instead of directly modifying Room
+                                    ) //  Callback instead of directly modifying Room
                                 }
                             }
                         }

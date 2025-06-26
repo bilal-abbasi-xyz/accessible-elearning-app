@@ -7,7 +7,7 @@ plugins {
     id("com.google.devtools.ksp")
 
 //    id("com.google.dagger.hilt.android") version "2.50"
-//    id("kotlin-kapt") // ✅ Apply kapt
+//    id("kotlin-kapt") //  Apply kapt
 
 }
 

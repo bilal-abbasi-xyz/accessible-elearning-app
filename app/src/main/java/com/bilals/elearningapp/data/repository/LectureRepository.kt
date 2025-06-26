@@ -17,7 +17,7 @@ class LectureRepository(
     context: Context
 ) {
     private val firebaseService = FirebaseServiceSingleton.instance
-    private val dbSyncManager = DatabaseSyncManager(context) // ✅ Initialize DatabaseSyncManager
+    private val dbSyncManager = DatabaseSyncManager(context) //  Initialize DatabaseSyncManager
 
     // Fetch lectures by sectionId from Room (local database)
     fun getLectures(sectionId: String): Flow<List<Lecture>> {

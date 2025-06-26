@@ -15,7 +15,7 @@ class CourseRepository(
     context: Context
 ) {
     private val firebaseService = FirebaseServiceSingleton.instance
-    private val dbSyncManager = DatabaseSyncManager(context) // ✅ Initialize DatabaseSyncManager
+    private val dbSyncManager = DatabaseSyncManager(context) //  Initialize DatabaseSyncManager
 
     fun getCourses(categoryId: String): Flow<List<Course>> {
         return courseDao.getCoursesByCategory(categoryId)
@@ -68,8 +68,8 @@ class CourseRepository(
     fun listenForUpdates(categoryId: String) {
         firebaseService.listenForCourseUpdates(categoryId) { courses ->
             CoroutineScope(Dispatchers.IO).launch {
-                courseDao.clearCoursesByCategory(categoryId) // ✅ Remove old data
-                courseDao.insertCourses(courses)  // ✅ Insert new data
+                courseDao.clearCoursesByCategory(categoryId) //  Remove old data
+                courseDao.insertCourses(courses)  //  Insert new data
             }
         }
     }

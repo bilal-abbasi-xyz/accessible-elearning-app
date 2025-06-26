@@ -50,7 +50,7 @@ class PublicForumViewModel(
                 id        = System.currentTimeMillis().toString(),
                 senderId  = senderId,
                 content   = content,
-                audioUrl  = audioPath,            // null for text, non-null for audio
+                audioUrl  = if (!audioPath.isNullOrBlank()) audioPath else null,
                 timestamp = System.currentTimeMillis(),
                 isAudio   = (audioPath != null)
             )
